@@ -3,6 +3,7 @@ package uk.me.eastmans.security;
 import jakarta.persistence.*;
 import org.jspecify.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -33,6 +34,15 @@ public class User {
     private Set<Persona> personas;
 
     protected User() { // To keep Hibernate happy
+    }
+
+    public User(String username, String password, Set<Persona> personas) {
+        this.username = username;
+        this.password = password;
+        this.enabled = true;
+        this.defaultPersona = personas.iterator().next();
+        this.personas = new HashSet<Persona>();
+        this.personas.addAll(personas);
     }
 
     public String getUsername() {

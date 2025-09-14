@@ -3,6 +3,7 @@ package uk.me.eastmans.security;
 import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -27,6 +28,12 @@ public class Persona implements Comparable{
     private Set<Authority> authorities;
 
     protected Persona() { // To keep Hibernate happy
+    }
+
+    public Persona(String name, Set<Authority> authorities) {
+        this.name = name;
+        this.authorities = new HashSet<Authority>();
+        this.authorities.addAll(authorities);
     }
 
     public Long getId() {

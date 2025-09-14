@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 public class Authority {
 
     public static final int NAME_MAX_LENGTH = 50;
+    public static final int DESCRIPTION_MAX_LENGTH = 200;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -16,7 +17,15 @@ public class Authority {
     @Column(name = "name", unique = true, nullable = false, length = NAME_MAX_LENGTH)
     private String name = "";
 
+    @Column(name = "description", nullable = false, length = DESCRIPTION_MAX_LENGTH)
+    private String description = "";
+
     protected Authority() { // To keep Hibernate happy
+    }
+
+    public Authority(String name, String description) {
+        this.name = name;
+        this.description = description;
     }
 
     public Long getId() {
@@ -29,6 +38,10 @@ public class Authority {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     @Override
