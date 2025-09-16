@@ -5,7 +5,6 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Entity
 @Table(name = "users")
@@ -41,7 +40,7 @@ public class User {
         this.password = password;
         this.enabled = true;
         this.defaultPersona = personas.iterator().next();
-        this.personas = new HashSet<Persona>();
+        this.personas = new HashSet<>();
         this.personas.addAll(personas);
     }
 
@@ -69,6 +68,10 @@ public class User {
         return personas;
     }
 
+    public void removePersona(Persona persona) {
+        this.personas.remove(persona);
+    }
+
     public Persona getPersonaWithName(String name) {
         Persona foundPersona = null;
         for (Persona persona : personas) {
@@ -76,7 +79,7 @@ public class User {
                 foundPersona = persona;
                 break;
             }
-        };
+        }
         return foundPersona;
     }
 

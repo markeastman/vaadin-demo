@@ -4,13 +4,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class MyUserPrincipal implements UserDetails {
-    private User user;
+    final private User user;
 
     private Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
 
@@ -68,8 +65,10 @@ public class MyUserPrincipal implements UserDetails {
 
     public void buildGrantedAuthorities() {
         // Now set up the authorities from the default persona
-        grantedAuthorities = new HashSet<GrantedAuthority>();
-        Set<Authority> authorities = user.getDefaultPersona().getAuthorities();
+        grantedAuthorities = new HashSet<>();
+        Set<Authority> authorities = Collections.emptySet();
+        if (user.getDefaultPersona() != null)
+            authorities = user.getDefaultPersona().getAuthorities();
         authorities.forEach(
                 authority -> grantedAuthorities.add( new SimpleGrantedAuthority(authority.getName())));
 

@@ -66,4 +66,8 @@ public class Authority {
         return name == null ? getClass().hashCode() : name.hashCode();
     }
 
+    @Override
+    public String toString() {
+        return name.substring(5); // Strinp off "ROLES_" from the front
+    }
 }

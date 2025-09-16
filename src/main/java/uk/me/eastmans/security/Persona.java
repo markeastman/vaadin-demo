@@ -8,7 +8,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "personas")
-public class Persona implements Comparable{
+public class Persona implements Comparable<Persona> {
 
     public static final int NAME_MAX_LENGTH = 50;
 
@@ -32,7 +32,7 @@ public class Persona implements Comparable{
 
     public Persona(String name, Set<Authority> authorities) {
         this.name = name;
-        this.authorities = new HashSet<Authority>();
+        this.authorities = new HashSet<>();
         this.authorities.addAll(authorities);
     }
 
@@ -75,7 +75,12 @@ public class Persona implements Comparable{
     }
 
     @Override
-    public int compareTo(@NotNull Object o) {
-        return name.compareToIgnoreCase(((Persona) o).getName());
+    public int compareTo(@NotNull Persona persona) {
+        return name.compareToIgnoreCase(persona.getName());
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }
