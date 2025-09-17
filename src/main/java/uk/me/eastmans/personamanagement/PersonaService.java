@@ -3,20 +3,21 @@ package uk.me.eastmans.personamanagement;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import uk.me.eastmans.security.Persona;
-import uk.me.eastmans.security.User;
-import uk.me.eastmans.security.UserRepository;
+import uk.me.eastmans.security.*;
 
 import java.util.List;
 
 @Service
 public class PersonaService {
 
+    private final AuthorityRepository authorityRepository;
     private final PersonaRepository personaRepository;
     private final UserRepository userRepository;
 
-    PersonaService(PersonaRepository personaRepository,
+    PersonaService(AuthorityRepository authorityRepository,
+                   PersonaRepository personaRepository,
                    UserRepository userRepository) {
+        this.authorityRepository = authorityRepository;
         this.personaRepository = personaRepository;
         this.userRepository = userRepository;
     }
@@ -49,6 +50,11 @@ public class PersonaService {
     }
 
     @Transactional(readOnly = true)
+    public List<Authority> getAllAuthorities() {
+        return authorityRepository.findAllByOrderByNameAsc();
+    }
+
+    @Transactional(readOnly = true)
     public List<Persona> list(Pageable pageable) {
         return personaRepository.findAllBy(pageable).toList();
     }
@@ -58,4 +64,8 @@ public class PersonaService {
         return personaRepository.findAll();
     }
 
+    @Transactional
+    public void saveOrCreate(Persona persona) {
+        personaRepository.saveAndFlush(persona);
+    }
 }

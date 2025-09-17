@@ -48,6 +48,10 @@ public class Persona implements Comparable<Persona> {
         this.name = name;
     }
 
+    public void setAuthorities(Set<Authority> authorities) {
+        this.authorities = authorities;
+    }
+
     public Set<Authority> getAuthorities() {
         return authorities;
     }

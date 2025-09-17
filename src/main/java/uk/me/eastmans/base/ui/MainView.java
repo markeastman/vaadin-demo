@@ -8,7 +8,6 @@ import uk.me.eastmans.base.ui.component.ViewToolbar;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -32,11 +31,6 @@ public final class MainView extends Main {
         contentDiv.addClassNames(LumoUtility.Flex.GROW, LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
                 LumoUtility.AlignItems.CENTER, LumoUtility.JustifyContent.CENTER);
 
-        //var icon = new SvgIcon("icons/construction.svg");
-        //icon.addClassNames(LumoUtility.TextColor.SUCCESS);
-        //icon.getStyle().setWidth("200px");
-        //icon.getStyle().setHeight("200px");
-
         SecurityContext securityContext = SecurityContextHolder.getContext();
         Authentication auth = securityContext.getAuthentication();
 
@@ -44,12 +38,11 @@ public final class MainView extends Main {
         centerDiv.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
                 LumoUtility.AlignItems.CENTER);
 
-        auth.getAuthorities().forEach(authority -> {
-            centerDiv.add(new Paragraph(authority.getAuthority()));
-        });
+        auth.getAuthorities().forEach(
+                authority -> centerDiv.add(new Paragraph(authority.toString())));
         contentDiv.add(centerDiv);
 
-         add(new ViewToolbar("Welcome to Vaadin! " + auth.getName()));
+        add(new ViewToolbar("Welcome to Vaadin! " + auth.getName()));
         add(contentDiv);
     }
 }

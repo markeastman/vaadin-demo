@@ -19,6 +19,8 @@ import jakarta.annotation.security.RolesAllowed;
 import uk.me.eastmans.personamanagement.PersonaService;
 import uk.me.eastmans.security.Persona;
 
+import java.util.HashSet;
+
 @Route("persona-list")
 @RolesAllowed("PERSONAS")
 @PageTitle("Personas List")
@@ -27,6 +29,7 @@ class PersonaListView extends Main {
 
     final PersonaService personaService;
     final Grid<Persona> personaGrid;
+    private PersonaEditDialog editDialog;
 
     PersonaListView(PersonaService personaService) {
         this.personaService = personaService;
@@ -44,17 +47,15 @@ class PersonaListView extends Main {
         newButton.setTooltipText("Create a new Persona");
         newButton.addClickListener(event -> {
             // Create a new Persona
+            Persona newPersona = new Persona("", new HashSet<>());
+            editDialog.open(newPersona, true);
         });
         actionsHeaderLayout.add(newButton);
         personaGrid.addComponentColumn(persona -> {
             HorizontalLayout actionsLayout = new HorizontalLayout();
             Button editButton = new Button(new Icon(VaadinIcon.EDIT));
             editButton.setTooltipText("Edit this Persona");
-            editButton.addClickListener(e -> {
-                //if (editor.isOpen())
-                //    editor.cancel();
-                //grid.getEditor().editItem(person);
-            });
+            editButton.addClickListener(e -> editDialog.open(persona, false));
             actionsLayout.add(editButton);
             actionsLayout.add(createRemoveButton(persona));
             return actionsLayout;
@@ -66,6 +67,7 @@ class PersonaListView extends Main {
 
        add(personaGrid);
 
+       editDialog = new PersonaEditDialog(personaService);
     }
 
     private Button createRemoveButton(Persona persona) {

@@ -23,7 +23,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,7 +42,7 @@ public final class MainLayout extends AppLayout {
 
     private final AuthenticationContext authenticationContext;
 
-    private MyUserDetailsService userDetailsService;
+    final private MyUserDetailsService userDetailsService;
 
     public MainLayout(AuthenticationContext authenticationContext,
                       MyUserDetailsService userDetailsService) {
@@ -109,11 +108,12 @@ public final class MainLayout extends AppLayout {
             MenuItem share = menuBar.addItem(authenticationContext.getPrincipalName().get());
             SubMenu shareSubMenu = share.getSubMenu();
             // Add the set of persona
-            MyUserPrincipal myUser = authenticationContext.getAuthenticatedUser(MyUserPrincipal.class).get();
+            MyUserPrincipal myUser =
+                    authenticationContext.getAuthenticatedUser(MyUserPrincipal.class).get();
             Set<Persona> personas = myUser.getPersonas();
             Persona currentPersona = myUser.getCurrentPersona();
             // We want a sorted list of Personas
-            ArrayList<Persona> arrayList = new ArrayList<Persona>(personas);
+            ArrayList<Persona> arrayList = new ArrayList<>(personas);
             // sorting the list
             Collections.sort(arrayList);
             arrayList.forEach(
@@ -150,6 +150,5 @@ public final class MainLayout extends AppLayout {
         SecurityContextHolder.getContext().setAuthentication(newAuth);
         // Get vaadin to recalculate the layout security aspects for the new persona
         UI.getCurrent().getPage().reload();
-        //getUI().ifPresent(ui -> ui.getPage().reload());
     }
 }
