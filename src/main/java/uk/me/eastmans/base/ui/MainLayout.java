@@ -32,6 +32,7 @@ import uk.me.eastmans.security.Persona;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.vaadin.flow.theme.lumo.LumoUtility.*;
@@ -108,24 +109,27 @@ public final class MainLayout extends AppLayout {
             MenuItem share = menuBar.addItem(authenticationContext.getPrincipalName().get());
             SubMenu shareSubMenu = share.getSubMenu();
             // Add the set of persona
-            MyUserPrincipal myUser =
-                    authenticationContext.getAuthenticatedUser(MyUserPrincipal.class).get();
-            Set<Persona> personas = myUser.getPersonas();
-            Persona currentPersona = myUser.getCurrentPersona();
-            // We want a sorted list of Personas
-            ArrayList<Persona> arrayList = new ArrayList<>(personas);
-            // sorting the list
-            Collections.sort(arrayList);
-            arrayList.forEach(
-                    persona -> {
-                        MenuItem mItem = shareSubMenu.addItem(persona.getName(), personaPicklistener);
-                        mItem.setCheckable(true);
-                        if (persona.equals(currentPersona)) {
-                            mItem.setChecked(true);
-                        }
-                        if (persona.equals(currentPersona))
-                            mItem.setEnabled(false);
-                    });
+            Optional<MyUserPrincipal> optionalUser =
+                    authenticationContext.getAuthenticatedUser(MyUserPrincipal.class);
+            MyUserPrincipal myUser = optionalUser.orElse(null);
+            if (myUser != null) {
+                Set<Persona> personas = myUser.getPersonas();
+                Persona currentPersona = myUser.getCurrentPersona();
+                // We want a sorted list of Personas
+                ArrayList<Persona> arrayList = new ArrayList<>(personas);
+                // sorting the list
+                Collections.sort(arrayList);
+                arrayList.forEach(
+                        persona -> {
+                            MenuItem mItem = shareSubMenu.addItem(persona.getName(), personaPicklistener);
+                            mItem.setCheckable(true);
+                            if (persona.equals(currentPersona)) {
+                                mItem.setChecked(true);
+                            }
+                            if (persona.equals(currentPersona))
+                                mItem.setEnabled(false);
+                        });
+            }
 
             shareSubMenu.addSeparator();
             ComponentEventListener<ClickEvent<MenuItem>> logoutListener =
@@ -140,15 +144,19 @@ public final class MainLayout extends AppLayout {
         LoggerFactory.getLogger(MainLayout.class)
                 .warn("Switching to persona with name = " + name);
         // First switch to the new Persona within the user object and then
-        MyUserPrincipal myUser = authenticationContext.getAuthenticatedUser(MyUserPrincipal.class).get();
-        userDetailsService.switchPersonaForUser(myUser.getUser(),name);
-        // Update granted authorities
-        myUser.buildGrantedAuthorities();
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Authentication newAuth = new UsernamePasswordAuthenticationToken(
-                auth.getPrincipal(), auth.getCredentials(), myUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(newAuth);
-        // Get vaadin to recalculate the layout security aspects for the new persona
-        UI.getCurrent().getPage().reload();
+        Optional<MyUserPrincipal> optional =
+                authenticationContext.getAuthenticatedUser(MyUserPrincipal.class);
+        MyUserPrincipal myUser = optional.orElse(null);
+        if (myUser != null) {
+            userDetailsService.switchPersonaForUser(myUser.getUser(), name);
+            // Update granted authorities
+            myUser.buildGrantedAuthorities();
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            Authentication newAuth = new UsernamePasswordAuthenticationToken(
+                    auth.getPrincipal(), auth.getCredentials(), myUser.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(newAuth);
+            // Get vaadin to recalculate the layout security aspects for the new persona
+            UI.getCurrent().getPage().reload();
+        }
     }
 }

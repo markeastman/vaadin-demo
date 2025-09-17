@@ -66,6 +66,7 @@ public class PersonaEditDialog extends Dialog {
         setHeaderTitle(createMode ? "New Persona" : "Edit Persona");
         // load the data into the fields from the Persona entity
         nameField.setValue(persona.getName());
+        nameField.setErrorMessage(""); // Clear it
         // Select the relevant authorities, loop through and select appropriately
         selectedAuthoprities.clear();
         selectedAuthoprities.select(persona.getAuthorities());
@@ -89,7 +90,7 @@ public class PersonaEditDialog extends Dialog {
             UI.getCurrent().getPage().reload();
         } catch (Exception e) {
             // Something went wrong so inform the user
-            nameField.setErrorMessage(e.getMessage());
+            nameField.setErrorMessage(e.getMessage()); // Need a way to display this
         }
     }
 }
