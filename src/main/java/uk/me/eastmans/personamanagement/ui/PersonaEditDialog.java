@@ -9,6 +9,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 import uk.me.eastmans.personamanagement.PersonaService;
 import uk.me.eastmans.security.Authority;
 import uk.me.eastmans.security.Persona;
@@ -20,10 +21,13 @@ public class PersonaEditDialog extends Dialog {
 
     final PersonaService personaService;
     final List<Authority> allAuthorities;
-    private Persona persona;
+    final Binder<Persona> editBinder = new Binder<>(Persona.class);
 
-    final private TextField nameField;
-    final private CheckboxGroup<Authority> selectedAuthoprities;
+    final TextField nameField;
+    final Button saveButton;
+    final CheckboxGroup<Authority> selectedAuthoprities;
+
+    private Persona persona;
 
     public PersonaEditDialog(PersonaService personaService) {
         this.personaService = personaService;
@@ -34,9 +38,12 @@ public class PersonaEditDialog extends Dialog {
 
         // Build the dialog
         nameField = new TextField("Name");
+        editBinder.forField(nameField)
+                .asRequired("Every Persona must have a unique name")
+                .withValidator(name -> name.length() <= Persona.NAME_MAX_LENGTH,
+                        "Name length must be less than " + (Persona.NAME_MAX_LENGTH+1) + ".")
+                .bind( Persona::getName, Persona::setName );
         nameField.setRequiredIndicatorVisible(true);
-        nameField.setMinLength(1);
-        nameField.setMaxLength(Persona.NAME_MAX_LENGTH);
         layout.add(nameField);
 
         selectedAuthoprities = new CheckboxGroup<>();
@@ -46,7 +53,7 @@ public class PersonaEditDialog extends Dialog {
         layout.add(selectedAuthoprities);
 
         // Create the buttons
-        Button saveButton = new Button("Save", e -> {
+        saveButton = new Button("Save", e -> {
             // We need to persis the changes back to the database
             saveOrCreate();
         } );
@@ -56,20 +63,26 @@ public class PersonaEditDialog extends Dialog {
         getFooter().add(saveButton);
 
         add(layout);
-
-        nameField.focus();
-    }
+   }
 
     public void open( Persona persona, boolean createMode)
     {
         this.persona = persona;
         setHeaderTitle(createMode ? "New Persona" : "Edit Persona");
         // load the data into the fields from the Persona entity
-        nameField.setValue(persona.getName());
-        nameField.setErrorMessage(""); // Clear it
+        editBinder.readBean(persona);
         // Select the relevant authorities, loop through and select appropriately
         selectedAuthoprities.clear();
         selectedAuthoprities.select(persona.getAuthorities());
+
+        // Enable or disable save button based on validation errors
+        editBinder.addStatusChangeListener(event -> {
+            boolean isValid = event.getBinder().isValid();
+            boolean hasChanges = event.getBinder().hasChanges();
+
+            saveButton.setEnabled(hasChanges && isValid);
+        });
+        nameField.focus();
 
         // Show the dialog
         open();
@@ -78,19 +91,27 @@ public class PersonaEditDialog extends Dialog {
     private void saveOrCreate() {
         // Get the fields and set the persona
         try {
-            persona.setName(nameField.getValue());
+            editBinder.writeBean(persona);
             Set<Authority> selections = selectedAuthoprities.getSelectedItems();
             // Get the selected authorities
             persona.setAuthorities(selections);
-            personaService.saveOrCreate(persona);
-            Notification.show("Persona saved", 3000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            close();
-            // Reload the list view that we came from
-            UI.getCurrent().getPage().reload();
+            if (editBinder.validate().isOk()) {
+                personaService.saveOrCreate(persona);
+                Notification.show("Persona saved", 3000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                close();
+                // Reload the list view that we came from
+                UI.getCurrent().getPage().reload();
+            }
         } catch (Exception e) {
             // Something went wrong so inform the user
-            nameField.setErrorMessage(e.getMessage()); // Need a way to display this
+            notifyValidationErrors(e);
         }
+    }
+
+    private void notifyValidationErrors(Exception e) {
+        // Need to show the error somehow
+        Notification.show(e.getMessage(), 5000, Notification.Position.TOP_STRETCH)
+                .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 }

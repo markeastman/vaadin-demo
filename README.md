@@ -40,4 +40,12 @@ and if accepted it will delete the Persona entity and update all the relevant
 users. Within the header there is also a plus button to create a new Persona. Both 
 the edit and the new should go to the same editing dialog.
 
+I have used a binder for the name field but at the moment I have not implemented a binder for the 
+Authority list but I think we should do one. I have managed to get
+validation working for the name field, but when I save to the database
+I can also get errors such as unique key violation but at the moment I do not know
+how to handle this error properly so I just throw up a general notification error.
+In essence the CRUD processing is working and I can create new Persona entities, edit them and delete
+them.
+
 
