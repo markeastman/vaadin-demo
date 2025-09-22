@@ -4,6 +4,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.notification.Notification;
@@ -11,6 +13,7 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.page.History;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -19,8 +22,13 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import uk.me.eastmans.base.ui.component.ViewToolbar;
+import uk.me.eastmans.personamanagement.PersonaService;
+import uk.me.eastmans.security.Persona;
 import uk.me.eastmans.security.User;
 import uk.me.eastmans.usermanagement.UserService;
+
+import java.util.List;
+import java.util.Set;
 
 @Route("user-edit")
 @RolesAllowed("USERS")
@@ -29,13 +37,20 @@ class UserEditView extends Main {
 
     private User user;
     final UserService userService;
+    final PersonaService personaService;
+    final List<Persona> allPersonas;
     final ViewToolbar viewToolbar;
     final TextField username;
     final Button saveButton;
     final Binder<User> editBinder = new Binder<>(User.class);
+    final CheckboxGroup<Persona> selectedPersonas;
+    final Select<Persona> defaultPersona;
 
-    UserEditView(UserService userService) {
+    UserEditView(UserService userService,
+                 PersonaService personaService) {
         this.userService = userService;
+        this.personaService = personaService;
+        allPersonas = personaService.listAll();
 
         username = new TextField("Username");
         editBinder.forField(username)
@@ -50,10 +65,19 @@ class UserEditView extends Main {
                         "The password length must be less than " + (User.PASSWORD_MAX_LENGTH+1) + ".")
                 .bind( User::getPassword, User::setPassword );
         PasswordField confirmPassword = new PasswordField("Confirm password");
-        confirmPassword.setRequired(true);
         Checkbox enabled = new Checkbox("Enabled");
         editBinder.forField(enabled)
                 .bind( User::isEnabled, User::setEnabled );
+        defaultPersona = new Select<>();
+        defaultPersona.setLabel("Default persona");
+        editBinder.forField(defaultPersona)
+                .asRequired("You must set a default persona")
+                .bind( User::getDefaultPersona, User::setDefaultPersona );
+
+        selectedPersonas = new CheckboxGroup<>();
+        selectedPersonas.setLabel("Personas");
+        selectedPersonas.setItems(allPersonas);
+        selectedPersonas.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
 
         FormLayout formLayout = new FormLayout();
         addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
@@ -62,6 +86,10 @@ class UserEditView extends Main {
         formLayout.addFormRow(username);
         formLayout.addFormRow(password, confirmPassword);
         formLayout.addFormRow(enabled);
+        formLayout.add(selectedPersonas);
+        formLayout.setColspan(selectedPersonas, 2);
+        formLayout.add(defaultPersona);
+        formLayout.setColspan(defaultPersona, 2);
 
         viewToolbar = new ViewToolbar("User Edit", ViewToolbar.group());
         add(viewToolbar);
@@ -74,7 +102,10 @@ class UserEditView extends Main {
             saveOrCreate();
         } );
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        Button cancel = new Button("Cancel");
+        Button cancel = new Button("Cancel", e -> {
+            History history = UI.getCurrent().getPage().getHistory();
+            history.back();
+        });
 
         HorizontalLayout buttonLayout = new HorizontalLayout(saveButton, cancel);
         add(buttonLayout);
@@ -84,19 +115,46 @@ class UserEditView extends Main {
         if (user.getUsername() == null) {
             viewToolbar.setTitle("Create User");
             saveButton.setText("Save");
+            saveButton.setEnabled(false);
         }
         this.user = user;
         editBinder.readBean(user);
+        // Select the relevant personas, loop through and select appropriately
+        selectedPersonas.clear();
+        selectedPersonas.select(user.getPersonas());
+        selectedPersonas.addSelectionListener(event -> {
+            // Some changes have been made, so update the default persona selection box
+            // Try to keep the selected item
+            Persona selected = defaultPersona.getValue();
+            defaultPersona.clear();
+            defaultPersona.setItems(selectedPersonas.getSelectedItems());
+            if (selected != null && selectedPersonas.getSelectedItems().contains(selected)) {
+                defaultPersona.setValue(selected);
+            } else {
+                defaultPersona.setValue(null);
+            }
+        });
+
+        defaultPersona.setItems(user.getPersonas());
+        defaultPersona.setValue(user.getDefaultPersona());
+
+        // Enable or disable save button based on validation errors
+        editBinder.addStatusChangeListener(event -> {
+            boolean isValid = event.getBinder().isValid();
+            boolean hasChanges = event.getBinder().hasChanges();
+
+            saveButton.setEnabled(hasChanges && isValid);
+        });
+        username.focus();
     }
 
     private void saveOrCreate() {
         try {
-            editBinder.writeBean(user);
-            /*
-            Set<Authority> selections = selectedAuthoprities.getSelectedItems();
+            Set<Persona> selections = selectedPersonas.getSelectedItems();
             // Get the selected authorities
-            persona.setAuthorities(selections);
-            */
+            user.setPersonas(selections);
+            editBinder.writeBean(user);
+            // Get the defaultPersona
             if (editBinder.validate().isOk()) {
                 userService.saveOrCreate(user);
                 Notification.show("User saved", 3000, Notification.Position.BOTTOM_END)

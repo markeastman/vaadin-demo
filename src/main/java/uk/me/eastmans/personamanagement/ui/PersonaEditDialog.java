@@ -25,7 +25,7 @@ public class PersonaEditDialog extends Dialog {
 
     final TextField nameField;
     final Button saveButton;
-    final CheckboxGroup<Authority> selectedAuthoprities;
+    final CheckboxGroup<Authority> selectedAuthorities;
 
     private Persona persona;
 
@@ -45,11 +45,11 @@ public class PersonaEditDialog extends Dialog {
                 .bind( Persona::getName, Persona::setName );
         layout.add(nameField);
 
-        selectedAuthoprities = new CheckboxGroup<>();
-        selectedAuthoprities.setLabel("Authorities");
-        selectedAuthoprities.setItems(allAuthorities);
-        selectedAuthoprities.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
-        layout.add(selectedAuthoprities);
+        selectedAuthorities = new CheckboxGroup<>();
+        selectedAuthorities.setLabel("Authorities");
+        selectedAuthorities.setItems(allAuthorities);
+        selectedAuthorities.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        layout.add(selectedAuthorities);
 
         // Create the buttons
         saveButton = new Button("Save", e -> {
@@ -71,8 +71,8 @@ public class PersonaEditDialog extends Dialog {
         // load the data into the fields from the Persona entity
         editBinder.readBean(persona);
         // Select the relevant authorities, loop through and select appropriately
-        selectedAuthoprities.clear();
-        selectedAuthoprities.select(persona.getAuthorities());
+        selectedAuthorities.clear();
+        selectedAuthorities.select(persona.getAuthorities());
 
         // Enable or disable save button based on validation errors
         editBinder.addStatusChangeListener(event -> {
@@ -91,7 +91,7 @@ public class PersonaEditDialog extends Dialog {
         // Get the fields and set the persona
         try {
             editBinder.writeBean(persona);
-            Set<Authority> selections = selectedAuthoprities.getSelectedItems();
+            Set<Authority> selections = selectedAuthorities.getSelectedItems();
             // Get the selected authorities
             persona.setAuthorities(selections);
             if (editBinder.validate().isOk()) {

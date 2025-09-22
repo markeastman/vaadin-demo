@@ -1,6 +1,7 @@
 package uk.me.eastmans.security;
 
 import jakarta.persistence.*;
+import jakarta.validation.ValidationException;
 import org.jspecify.annotations.Nullable;
 
 import java.util.HashSet;
@@ -70,7 +71,11 @@ public class User {
     }
 
     public void setDefaultPersona(Persona defaultPersona) {
-        this.defaultPersona = defaultPersona;
+        // Must be in the set of personas
+        if (personas.contains(defaultPersona))
+            this.defaultPersona = defaultPersona;
+        else
+            throw new ValidationException("The persona must be in the list of personas");
     }
 
     public Boolean isEnabled() {
@@ -84,6 +89,8 @@ public class User {
     public Set<Persona> getPersonas() {
         return personas;
     }
+
+    public void setPersonas(Set<Persona> personas) {this.personas = personas;}
 
     public void removePersona(Persona persona) {
         this.personas.remove(persona);
