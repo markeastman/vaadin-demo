@@ -35,8 +35,12 @@ public class User {
     protected User() { // To keep Hibernate happy
     }
 
-    public User(String username, String password, Set<Persona> personas) {
+    public User(String username) {
         this.username = username;
+    }
+
+    public User(String username, String password, Set<Persona> personas) {
+        this(username);
         this.password = password;
         this.enabled = true;
         this.defaultPersona = personas.iterator().next();
@@ -62,6 +66,10 @@ public class User {
 
     public Boolean isEnabled() {
         return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 
     public Set<Persona> getPersonas() {

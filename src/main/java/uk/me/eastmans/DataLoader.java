@@ -12,9 +12,9 @@ import java.util.HashSet;
 @Component
 public class DataLoader implements ApplicationRunner {
 
-    private AuthorityRepository authorityRepository;
-    private PersonaRepository personaRepository;
-    private UserRepository userRepository;
+    final AuthorityRepository authorityRepository;
+    final PersonaRepository personaRepository;
+    final UserRepository userRepository;
 
     @Autowired
     public DataLoader(AuthorityRepository authorityRepository,
@@ -69,5 +69,12 @@ public class DataLoader implements ApplicationRunner {
         ccPersonas.add(smPersona);
         User ccUser = new User("cc", "{noop}cc", ccPersonas);
         userRepository.save(ccUser);
+        User disabledUser = new User("disabled", "{noop}disabled", ccPersonas);
+        disabledUser.setEnabled(false);
+        userRepository.save(disabledUser);
+        for (int i = 0; i < 100; i++) {
+            User u = new User("u" + i, "{noop}u" + i, ccPersonas);
+            userRepository.save(u);
+        }
     }
 }

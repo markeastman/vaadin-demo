@@ -92,8 +92,8 @@ class PersonaListView extends Main {
         personaService.deletePersona(persona);
         personaGrid.setItems(personaService.listAll());
 
-        //personaGrid.getDataProvider().refreshItem(persona);
-        Notification.show("Persona deleted", 3000, Notification.Position.BOTTOM_END)
-                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);}
+        Notification.show("Persona '" + persona.getName() + "' deleted", 3000, Notification.Position.BOTTOM_END)
+                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
 
 }

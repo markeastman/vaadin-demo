@@ -2,7 +2,6 @@ package uk.me.eastmans.base.ui.component;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Header;
@@ -13,6 +12,8 @@ import org.jspecify.annotations.Nullable;
 @NullMarked
 public final class ViewToolbar extends Composite<Header> {
 
+    final H1 title;
+
     public ViewToolbar(@Nullable String viewTitle, Component... components) {
         addClassNames(Display.FLEX, FlexDirection.COLUMN, JustifyContent.BETWEEN, AlignItems.STRETCH, Gap.MEDIUM,
                 FlexDirection.Breakpoint.Medium.ROW, AlignItems.Breakpoint.Medium.CENTER);
@@ -20,7 +21,7 @@ public final class ViewToolbar extends Composite<Header> {
         //var drawerToggle = new DrawerToggle();
         //drawerToggle.addClassNames(Margin.NONE);
 
-        var title = new H1(viewTitle);
+        title = new H1(viewTitle);
         title.addClassNames(FontSize.XLARGE, Margin.NONE, FontWeight.LIGHT);
 
         //var toggleAndTitle = new Div(drawerToggle, title);
@@ -41,5 +42,9 @@ public final class ViewToolbar extends Composite<Header> {
         group.addClassNames(Display.FLEX, FlexDirection.COLUMN, AlignItems.STRETCH, Gap.SMALL,
                 FlexDirection.Breakpoint.Medium.ROW, AlignItems.Breakpoint.Medium.CENTER);
         return group;
+    }
+
+    public void setTitle(String title) {
+        this.title.setText(title);
     }
 }
