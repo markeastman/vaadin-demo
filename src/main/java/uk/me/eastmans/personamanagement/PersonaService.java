@@ -22,14 +22,6 @@ public class PersonaService {
         this.userRepository = userRepository;
     }
 
-    /*
-    @Transactional
-    public void createPersona(String name, Set<Authority> authorities) {
-        var persona = new Persona(name, authorities);
-        personaRepository.saveAndFlush(persona);
-    }
-     */
-
     @Transactional
     public void deletePersona(Persona persona) {
         // We need to check all users that have this persona as a default persona

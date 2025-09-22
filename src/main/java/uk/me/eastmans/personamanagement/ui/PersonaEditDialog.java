@@ -43,7 +43,6 @@ public class PersonaEditDialog extends Dialog {
                 .withValidator(name -> name.length() <= Persona.NAME_MAX_LENGTH,
                         "Name length must be less than " + (Persona.NAME_MAX_LENGTH+1) + ".")
                 .bind( Persona::getName, Persona::setName );
-        nameField.setRequiredIndicatorVisible(true);
         layout.add(nameField);
 
         selectedAuthoprities = new CheckboxGroup<>();

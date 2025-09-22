@@ -11,12 +11,17 @@ import java.util.Set;
 public class User {
 
     public static final int USERNAME_MAX_LENGTH = 50;
+    public static final int PASSWORD_MAX_LENGTH = 50;
 
     @Id
-    @Column(name = "username", nullable = false, length = USERNAME_MAX_LENGTH)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "username", unique = true, nullable = false, length = USERNAME_MAX_LENGTH)
     private String username = "";
 
-    @Column(name = "password", nullable = false, length = USERNAME_MAX_LENGTH)
+    @Column(name = "password", nullable = false, length = PASSWORD_MAX_LENGTH)
     private String password = "";
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -52,9 +57,13 @@ public class User {
         return username;
     }
 
+    public void setUsername(String username) {this.username = username;}
+
     public String getPassword() {
         return password;
     }
+
+    public void setPassword(String password) {this.password = password;}
 
     public @Nullable Persona getDefaultPersona() {
         return defaultPersona;
