@@ -1,6 +1,7 @@
 package uk.me.eastmans.usermanagement;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.me.eastmans.security.User;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@PreAuthorize("isAuthenticated()")
 public class UserService {
 
     private final UserRepository userRepository;

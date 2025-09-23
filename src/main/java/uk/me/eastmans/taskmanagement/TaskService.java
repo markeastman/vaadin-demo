@@ -2,6 +2,7 @@ package uk.me.eastmans.taskmanagement;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@PreAuthorize("isAuthenticated()")
 public class TaskService {
 
     private final TaskRepository taskRepository;

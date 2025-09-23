@@ -147,12 +147,14 @@ class UserEditView extends Main implements HasUrlParameter<String> {
         defaultPersona.setValue(user.getDefaultPersona());
 
         // Enable or disable save button based on validation errors
+        /* This does not work properly, probably my implementation
         editBinder.addStatusChangeListener(event -> {
             boolean isValid = event.getBinder().isValid();
             boolean hasChanges = event.getBinder().hasChanges();
 
             saveButton.setEnabled(hasChanges && isValid);
         });
+        */
         username.focus();
     }
 

@@ -1,5 +1,6 @@
 package uk.me.eastmans.personamanagement;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import uk.me.eastmans.security.*;
 import java.util.List;
 
 @Service
+@PreAuthorize("isAuthenticated()")
 public class PersonaService {
 
     private final AuthorityRepository authorityRepository;
