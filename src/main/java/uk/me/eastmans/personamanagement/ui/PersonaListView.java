@@ -16,6 +16,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
+import uk.me.eastmans.base.ui.component.ViewToolbar;
 import uk.me.eastmans.personamanagement.PersonaService;
 import uk.me.eastmans.security.Persona;
 
@@ -65,9 +66,10 @@ class PersonaListView extends Main {
         addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
                 LumoUtility.Padding.MEDIUM, LumoUtility.Gap.SMALL);
 
-       add(personaGrid);
+        add(new ViewToolbar("Persona List", ViewToolbar.group()));
+        add(personaGrid);
 
-       editDialog = new PersonaEditDialog(personaService);
+        editDialog = new PersonaEditDialog(personaService);
     }
 
     private Button createRemoveButton(Persona persona) {

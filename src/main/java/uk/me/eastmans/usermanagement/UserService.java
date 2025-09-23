@@ -7,6 +7,7 @@ import uk.me.eastmans.security.User;
 import uk.me.eastmans.security.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -37,4 +38,7 @@ public class UserService {
     public void saveOrCreate(User user) {
         userRepository.saveAndFlush(user);
     }
+
+    @Transactional
+    public Optional<User> getUser(long id) { return userRepository.findById(String.valueOf(id));}
 }

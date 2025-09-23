@@ -82,9 +82,7 @@ class UserListView extends Main {
             HorizontalLayout actionsLayout = new HorizontalLayout();
             Button editButton = new Button(new Icon(VaadinIcon.EDIT));
             editButton.setTooltipText("Edit this User");
-            editButton.addClickListener(e ->
-                    editButton.getUI().flatMap( ui ->
-                            ui.navigate(UserEditView.class)).ifPresent(editor -> editor.editUser(user)));
+            editButton.addClickListener(event -> UserEditView.editUser(user.getId()));
             actionsLayout.add(editButton);
             actionsLayout.add(createRemoveButton(user));
             return actionsLayout;
@@ -126,17 +124,13 @@ class UserListView extends Main {
 
     private void createUser() {
         // We need to create a user page
-        User newUser = new User(null);
-        getUI().flatMap( ui ->
-                ui.navigate(UserEditView.class)).ifPresent(editor ->
-                    editor.editUser(newUser));
+        UserEditView.editUser(0L);
     }
 
     private static Component createFilterHeader(String labelText,
                                                 Consumer<String> filterChangeConsumer) {
         NativeLabel label = new NativeLabel(labelText);
         label.getStyle().set("padding-top", "var(--lumo-space-m)");
-                //.set("font-size", "var(--lumo-font-size-xs)");
         TextField textField = new TextField();
         textField.setValueChangeMode(ValueChangeMode.EAGER);
         textField.setClearButtonVisible(true);

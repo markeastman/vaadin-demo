@@ -17,8 +17,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import uk.me.eastmans.base.ui.component.ViewToolbar;
@@ -28,12 +27,13 @@ import uk.me.eastmans.security.User;
 import uk.me.eastmans.usermanagement.UserService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Route("user-edit")
 @RolesAllowed("USERS")
 @PageTitle("User Edit")
-class UserEditView extends Main {
+class UserEditView extends Main implements HasUrlParameter<String> {
 
     private User user;
     final UserService userService;
@@ -45,6 +45,10 @@ class UserEditView extends Main {
     final Binder<User> editBinder = new Binder<>(User.class);
     final CheckboxGroup<Persona> selectedPersonas;
     final Select<Persona> defaultPersona;
+
+    public static void editUser(Long userId) {
+        UI.getCurrent().navigate(UserEditView.class, String.valueOf(userId));
+    }
 
     UserEditView(UserService userService,
                  PersonaService personaService) {
@@ -78,6 +82,7 @@ class UserEditView extends Main {
         selectedPersonas.setLabel("Personas");
         selectedPersonas.setItems(allPersonas);
         selectedPersonas.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        selectedPersonas.setRequiredIndicatorVisible(true);
 
         FormLayout formLayout = new FormLayout();
         //formLayout.setExpandColumns(true);
@@ -114,7 +119,7 @@ class UserEditView extends Main {
         add(buttonLayout);
     }
 
-    public void editUser(User user) {
+    public void setUser(User user) {
         if (user.getUsername() == null) {
             viewToolbar.setTitle("Create User");
             saveButton.setText("Save");
@@ -175,5 +180,18 @@ class UserEditView extends Main {
         // Need to show the error somehow
         Notification.show(e.getMessage(), 5000, Notification.Position.TOP_STRETCH)
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
+    }
+
+    @Override
+    public void setParameter(BeforeEvent beforeEvent, String aLong) {
+        // Get user with the passed id, or create a new User
+        User passedUser;
+        if (aLong == null) {
+            passedUser = new User("");
+        } else {
+            Optional<User> u = userService.getUser(Long.parseLong(aLong));
+            passedUser = u.orElseGet(() -> new User(null));
+        }
+        setUser(passedUser);
     }
 }

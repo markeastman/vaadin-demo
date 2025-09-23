@@ -9,7 +9,7 @@ or from the command line use:
 
 ## Security
 The security for the systems is based upon simple username and password 
-authentication but I want to test the ability for users to have personas
+authentication, but I want to test the ability for users to have personas
 (similar to groups) and for them to select the persona they want to see
 a menu for and work as. So a user could act as an administrator sometimes but generally as say a credit controller the rest of the time.
 He can move between these two personas as he wants so as not to get flooded with menu
@@ -19,7 +19,7 @@ So a User can have many Personas and each persona has a set of roles that
 someone with this persona can do. The roles govern the low level access to menu options
 etc. The Persona is an application wide name and has a set of roles which anyone with that persona will 
 be able to run as. The administrator can create and change the associations of Personas to roles
-so as to create Personas that are meaningful to their business, but the underlying set
+allowing them to create Personas that are meaningful to their business, but the underlying set
 of roles is hard coded within the application.
 
 For the demo application we have two deployed test users:
@@ -41,11 +41,24 @@ users. Within the header there is also a plus button to create a new Persona. Bo
 the edit and the new should go to the same editing dialog.
 
 I have used a binder for the name field but at the moment I have not implemented a binder for the 
-Authority list but I think we should do one. I have managed to get
+Authority list, but I think we should do one. I have managed to get
 validation working for the name field, but when I save to the database
 I can also get errors such as unique key violation but at the moment I do not know
 how to handle this error properly so I just throw up a general notification error.
 In essence the CRUD processing is working and I can create new Persona entities, edit them and delete
 them.
+
+I have written the CRUD aspect for users using a full page view rather than a dialog.
+This is working better I think than the dialog approach used by the persona edit. Within the view 
+it can call a static method on the edit view to route to itself passing a parameter on the url
+
+# Things to do or investigate
+
+1. Need to think about when to use dialogs for editing and 
+when to use views. I think the view processing is better as it seems to have better 
+layout control, button controls and navigation.
+1. Need to look at how to handle errors, specifically the 
+way we handle business errors and not just simply field errors.
+1. We could do with looking at validation errors via annotations on the business entities.
 
 

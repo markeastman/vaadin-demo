@@ -2,6 +2,7 @@ package uk.me.eastmans.personamanagement.ui;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -56,6 +57,7 @@ public class PersonaEditDialog extends Dialog {
             // We need to persis the changes back to the database
             saveOrCreate();
         } );
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         Button cancelButton = new Button("Cancel", e -> close());
 
         getFooter().add(cancelButton);

@@ -43,16 +43,18 @@ public class User {
 
     public User(String username) {
         this.username = username;
+        this.enabled = true;
+        this.personas = new HashSet<>();
     }
 
     public User(String username, String password, Set<Persona> personas) {
         this(username);
         this.password = password;
-        this.enabled = true;
         this.defaultPersona = personas.iterator().next();
-        this.personas = new HashSet<>();
         this.personas.addAll(personas);
     }
+
+    public Long getId() { return id;}
 
     public String getUsername() {
         return username;
