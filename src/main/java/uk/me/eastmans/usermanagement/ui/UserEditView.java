@@ -80,15 +80,18 @@ class UserEditView extends Main {
         selectedPersonas.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
 
         FormLayout formLayout = new FormLayout();
+        //formLayout.setExpandColumns(true);
+        formLayout.setExpandFields(true);
         addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
                 LumoUtility.Padding.MEDIUM, LumoUtility.Gap.SMALL);
         formLayout.setAutoResponsive(true);
         formLayout.addFormRow(username);
+        formLayout.setColspan(username, 2);
         formLayout.addFormRow(password, confirmPassword);
         formLayout.addFormRow(enabled);
-        formLayout.add(selectedPersonas);
+        formLayout.addFormRow(selectedPersonas);
         formLayout.setColspan(selectedPersonas, 2);
-        formLayout.add(defaultPersona);
+        formLayout.addFormRow(defaultPersona);
         formLayout.setColspan(defaultPersona, 2);
 
         viewToolbar = new ViewToolbar("User Edit", ViewToolbar.group());
