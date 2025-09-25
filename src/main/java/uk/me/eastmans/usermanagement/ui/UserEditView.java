@@ -10,8 +10,10 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.History;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.PasswordField;
@@ -33,7 +35,7 @@ import java.util.Set;
 @Route("user-edit")
 @RolesAllowed("USERS")
 @PageTitle("User Edit")
-class UserEditView extends Main implements HasUrlParameter<String> {
+public class UserEditView extends Main implements HasUrlParameter<String> {
 
     private User user;
     final UserService userService;
@@ -45,6 +47,7 @@ class UserEditView extends Main implements HasUrlParameter<String> {
     final Binder<User> editBinder = new Binder<>(User.class);
     final CheckboxGroup<Persona> selectedPersonas;
     final Select<Persona> defaultPersona;
+    final PasswordField passwordField;
 
     public static void editUser(Long userId) {
         UI.getCurrent().navigate(UserEditView.class, String.valueOf(userId));
@@ -62,13 +65,24 @@ class UserEditView extends Main implements HasUrlParameter<String> {
                 .withValidator(name -> name.length() <= User.USERNAME_MAX_LENGTH,
                         "Name length must be less than " + (User.USERNAME_MAX_LENGTH+1) + ".")
                 .bind( User::getUsername, User::setUsername );
-        PasswordField password = new PasswordField("Password");
-        editBinder.forField(password)
+        passwordField = new PasswordField("Password");
+        editBinder.forField(passwordField)
                 .asRequired("The password must be set")
                 .withValidator(name -> name.length() <= User.PASSWORD_MAX_LENGTH,
                         "The password length must be less than " + (User.PASSWORD_MAX_LENGTH+1) + ".")
                 .bind( User::getPassword, User::setPassword );
-        PasswordField confirmPassword = new PasswordField("Confirm password");
+        Button changePassword = new Button("Change Password", event -> {
+            // We have been clicked so display dialog to edit the password
+            ChangePasswordDialog changePasswordDialog = new ChangePasswordDialog();
+            changePasswordDialog.openDialog(this);
+        });
+        changePassword.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        // We need to align the button with the text field of password and
+        // not the label when displayed in vertical alignment.
+        VerticalLayout buttonArea = new VerticalLayout();
+        buttonArea.setPadding(false);
+        buttonArea.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        buttonArea.add(changePassword);
         Checkbox enabled = new Checkbox("Enabled");
         editBinder.forField(enabled)
                 .bind( User::isEnabled, User::setEnabled );
@@ -92,7 +106,7 @@ class UserEditView extends Main implements HasUrlParameter<String> {
         formLayout.setAutoResponsive(true);
         formLayout.addFormRow(username);
         formLayout.setColspan(username, 2);
-        formLayout.addFormRow(password, confirmPassword);
+        formLayout.addFormRow(passwordField, buttonArea);
         formLayout.addFormRow(enabled);
         formLayout.addFormRow(selectedPersonas);
         formLayout.setColspan(selectedPersonas, 2);
@@ -117,6 +131,10 @@ class UserEditView extends Main implements HasUrlParameter<String> {
 
         HorizontalLayout buttonLayout = new HorizontalLayout(saveButton, cancel);
         add(buttonLayout);
+    }
+
+    public User getUser() {
+        return user;
     }
 
     public void setUser(User user) {
@@ -156,6 +174,12 @@ class UserEditView extends Main implements HasUrlParameter<String> {
         });
         */
         username.focus();
+    }
+
+    public void setPassword(String password) {
+        user.setPassword(password);
+        // Need to update screen
+        passwordField.setValue(user.getPassword());
     }
 
     private void saveOrCreate() {

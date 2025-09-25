@@ -60,5 +60,6 @@ layout control, button controls and navigation.
 1. Need to look at how to handle errors, specifically the 
 way we handle business errors and not just simply field errors.
 1. We could do with looking at validation errors via annotations on the business entities.
+2. Check to make sure we have the write stateless aspects
 
 
