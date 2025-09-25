@@ -66,10 +66,8 @@ public class UserEditView extends Main implements HasUrlParameter<String> {
                         "Name length must be less than " + (User.USERNAME_MAX_LENGTH+1) + ".")
                 .bind( User::getUsername, User::setUsername );
         passwordField = new PasswordField("Password");
+        passwordField.setReadOnly(true);
         editBinder.forField(passwordField)
-                .asRequired("The password must be set")
-                .withValidator(name -> name.length() <= User.PASSWORD_MAX_LENGTH,
-                        "The password length must be less than " + (User.PASSWORD_MAX_LENGTH+1) + ".")
                 .bind( User::getPassword, User::setPassword );
         Button changePassword = new Button("Change Password", event -> {
             // We have been clicked so display dialog to edit the password
@@ -164,15 +162,6 @@ public class UserEditView extends Main implements HasUrlParameter<String> {
         defaultPersona.setItems(user.getPersonas());
         defaultPersona.setValue(user.getDefaultPersona());
 
-        // Enable or disable save button based on validation errors
-        /* This does not work properly, probably my implementation
-        editBinder.addStatusChangeListener(event -> {
-            boolean isValid = event.getBinder().isValid();
-            boolean hasChanges = event.getBinder().hasChanges();
-
-            saveButton.setEnabled(hasChanges && isValid);
-        });
-        */
         username.focus();
     }
 

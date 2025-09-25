@@ -3,6 +3,8 @@ package uk.me.eastmans.security;
 import jakarta.persistence.*;
 import jakarta.validation.ValidationException;
 import org.jspecify.annotations.Nullable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,7 +14,10 @@ import java.util.Set;
 public class User {
 
     public static final int USERNAME_MAX_LENGTH = 50;
-    public static final int PASSWORD_MAX_LENGTH = 50;
+    public static final int PASSWORD_MAX_LENGTH = 100;
+
+    private static final String encoding = "{bcrypt}";
+    private static final PasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -63,10 +68,15 @@ public class User {
     public void setUsername(String username) {this.username = username;}
 
     public String getPassword() {
-        return password;
+        // We need to strip off the {bcrypt} prefix
+        return password.startsWith(encoding) ?
+                password.substring(encoding.length()) : password;
     }
 
-    public void setPassword(String password) {this.password = password;}
+    public void setPassword(String password) {
+        // We need to encode the password using bcrypt
+        this.password = encoding + encoder.encode(password);
+    }
 
     public @Nullable Persona getDefaultPersona() {
         return defaultPersona;

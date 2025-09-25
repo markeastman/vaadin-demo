@@ -2,7 +2,6 @@ package uk.me.eastmans.personamanagement.ui;
 
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.icon.Icon;
@@ -16,6 +15,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
+import uk.me.eastmans.base.ui.component.ConfirmDeleteDialog;
 import uk.me.eastmans.base.ui.component.ViewToolbar;
 import uk.me.eastmans.personamanagement.PersonaService;
 import uk.me.eastmans.security.Persona;
@@ -75,17 +75,9 @@ class PersonaListView extends Main {
     private Button createRemoveButton(Persona persona) {
         Button removeButton = new Button(new Icon(VaadinIcon.TRASH));
         removeButton.setTooltipText("Remove this Persona");
-        removeButton.addClickListener(e -> {
-            ConfirmDialog dialog = new ConfirmDialog();
-            dialog.setHeader("Are you sure?");
-            dialog.setText("This will delete the Persona '" +
-                    persona.getName() + "' and remove it from every user");
-            dialog.setCancelable(true);
-            dialog.setCancelText("No");
-            dialog.setConfirmText("Yes");
-            dialog.addConfirmListener(event -> removePersona(persona) );
-            dialog.open();
-        });
+        removeButton.addClickListener(e -> new ConfirmDeleteDialog(
+                "Delete Persona", "This will permanently delete '" + persona.getName() + "'",
+                event -> removePersona(persona) ));
         return removeButton;
     }
 

@@ -73,7 +73,7 @@ public class DataLoader implements ApplicationRunner {
         disabledUser.setEnabled(false);
         userRepository.save(disabledUser);
         for (int i = 0; i < 100; i++) {
-            User u = new User("u" + i, "{noop}u" + i, ccPersonas);
+            User u = new User("u" + i, "{bcrypt}$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG", ccPersonas);
             userRepository.save(u);
         }
     }

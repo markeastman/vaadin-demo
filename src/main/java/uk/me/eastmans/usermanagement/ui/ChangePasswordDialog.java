@@ -8,7 +8,6 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import uk.me.eastmans.security.User;
 
 public class ChangePasswordDialog extends Dialog {
 
@@ -28,7 +27,7 @@ public class ChangePasswordDialog extends Dialog {
 
         // Create the buttons
         saveButton = new Button("Save", e -> {
-            // We need to persis the changes back to the user that was passed in to us
+            // We need to persist the changes back to the user that was passed in to us
             savePassword();
         } );
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -44,10 +43,9 @@ public class ChangePasswordDialog extends Dialog {
     {
         this.userEditView = editView;
         setHeaderTitle("Change Password");
-        User user = editView.getUser();
-        passwordField.setValue( user.getPassword() );
+        passwordField.setValue( "" );
         passwordField.setValueChangeMode(ValueChangeMode.EAGER);
-        confirmPasswordField.setValue( user.getPassword() );
+        confirmPasswordField.setValue( "" );
         confirmPasswordField.setValueChangeMode(ValueChangeMode.EAGER);
         saveButton.setEnabled(false);
 

@@ -3,7 +3,6 @@ package uk.me.eastmans.usermanagement.ui;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
@@ -26,6 +25,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
+import uk.me.eastmans.base.ui.component.ConfirmDeleteDialog;
 import uk.me.eastmans.base.ui.component.ViewToolbar;
 import uk.me.eastmans.security.User;
 import uk.me.eastmans.usermanagement.UserService;
@@ -48,7 +48,7 @@ class UserListView extends Main {
 
         userGrid = new Grid<>();
         Grid.Column<User> usernameColumn = userGrid.addColumn(User::getUsername);
-        Grid.Column<User> personasColumn = userGrid.addColumn(User::getPersonas);
+        userGrid.addColumn(User::getPersonas);
         Grid.Column<User> actionsColumn = userGrid.addColumn(new ComponentRenderer<>(user -> {
             if (user.isEnabled()) {
                 return VaadinIcon.CHECK.create();
@@ -99,16 +99,9 @@ class UserListView extends Main {
     private Button createRemoveButton(User user) {
         Button removeButton = new Button(new Icon(VaadinIcon.TRASH));
         removeButton.setTooltipText("Remove this User");
-        removeButton.addClickListener(e -> {
-            ConfirmDialog dialog = new ConfirmDialog();
-            dialog.setHeader("Are you sure?");
-            dialog.setText("This will delete the User '" + user.getUsername() + "'");
-            dialog.setCancelable(true);
-            dialog.setCancelText("No");
-            dialog.setConfirmText("Yes");
-            dialog.addConfirmListener(event -> removeUser(user) );
-            dialog.open();
-        });
+        removeButton.addClickListener(e -> new ConfirmDeleteDialog(
+                "Delete User", "This will permanently delete '" + user.getUsername() + "'",
+                event -> removeUser(user) ));
         return removeButton;
     }
 
