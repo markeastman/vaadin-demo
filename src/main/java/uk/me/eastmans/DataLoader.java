@@ -4,22 +4,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+import uk.me.eastmans.expensesmanagement.ExpenseHeader;
+import uk.me.eastmans.expensesmanagement.ExpenseHeaderRepository;
+import uk.me.eastmans.expensesmanagement.ExpenseLine;
 import uk.me.eastmans.personamanagement.PersonaRepository;
 import uk.me.eastmans.security.*;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 
 @Component
 public class DataLoader implements ApplicationRunner {
 
+    final ExpenseHeaderRepository expenseHeaderRepository;
     final AuthorityRepository authorityRepository;
     final PersonaRepository personaRepository;
     final UserRepository userRepository;
 
     @Autowired
-    public DataLoader(AuthorityRepository authorityRepository,
+    public DataLoader(ExpenseHeaderRepository expenseHeaderRepository,
+                      AuthorityRepository authorityRepository,
                       PersonaRepository personaRepository,
                       UserRepository userRepository) {
+        this.expenseHeaderRepository = expenseHeaderRepository;
         this.authorityRepository = authorityRepository;
         this.personaRepository = personaRepository;
         this.userRepository = userRepository;
@@ -41,17 +49,21 @@ public class DataLoader implements ApplicationRunner {
         authorityRepository.save(users);
         Authority personas = new Authority("ROLE_PERSONAS", "Manage personas");
         authorityRepository.save(personas);
+        Authority expenses = new Authority("ROLE_EXPENSES", "Manage expenses");
+        authorityRepository.save(expenses);
 
         // Create the personas
         HashSet<Authority> adminAuthorities = new HashSet<>();
         adminAuthorities.add(processes);
         adminAuthorities.add(users);
         adminAuthorities.add(personas);
+        adminAuthorities.add(expenses);
         Persona adminPersona = new Persona("Administrator", adminAuthorities);
         personaRepository.save(adminPersona);
         HashSet<Authority> ccAuthorities = new HashSet<>();
         ccAuthorities.add(suppliers);
         ccAuthorities.add(tasks);
+        ccAuthorities.add(expenses);
         Persona ccPersona = new Persona("Credit Controller", ccAuthorities);
         personaRepository.save(ccPersona);
         HashSet<Authority> smAuthorities = new HashSet<>();
@@ -76,5 +88,13 @@ public class DataLoader implements ApplicationRunner {
             User u = new User("u" + i, "{bcrypt}$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG", ccPersonas);
             userRepository.save(u);
         }
+
+        // Add some expenses
+        ExpenseHeader expense = new ExpenseHeader(adminUser, "Greece trip", "Devoxx conference in Greece");
+        ExpenseLine line1 = new ExpenseLine(expense,"Hotel");
+        line1.setExpenseDate(new GregorianCalendar(2025, Calendar.FEBRUARY, 11).getTime());
+        ExpenseLine line2 = new ExpenseLine(expense,"Flights");
+        line2.setExpenseDate(new GregorianCalendar(2025, Calendar.FEBRUARY, 11).getTime());
+        expenseHeaderRepository.save(expense);
     }
 }

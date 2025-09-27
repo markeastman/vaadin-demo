@@ -52,6 +52,11 @@ I have written the CRUD aspect for users using a full page view rather than a di
 This is working better I think than the dialog approach used by the persona edit. Within the view 
 it can call a static method on the edit view to route to itself passing a parameter on the url
 
+To help with more complex processing I have added an Expense entry.
+This has a header and multiple lines. Each line can be a different
+type of expense so we will need to have different panels for
+each expense type.
+
 # Things to do or investigate
 
 1. Need to think about when to use dialogs for editing and 
@@ -61,5 +66,3 @@ layout control, button controls and navigation.
 way we handle business errors and not just simply field errors.
 1. We could do with looking at validation errors via annotations on the business entities.
 2. Check to make sure we have the write stateless aspects
-
-
