@@ -5,11 +5,14 @@ import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 
 public class MessageDialog extends ConfirmDialog {
 
-    public MessageDialog(String header, String message) {
+    private MessageDialog(String header, String message) {
         setHeader(header);
         setText(new Html(message));
         setConfirmText("OK");
-        // Show the dialog
-        open();
+    }
+
+    public static void show(String header, String message) {
+        MessageDialog dialog = new MessageDialog(header, message);
+        dialog.open();
     }
 }

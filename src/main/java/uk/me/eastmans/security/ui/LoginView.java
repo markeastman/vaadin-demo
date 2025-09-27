@@ -33,8 +33,7 @@ public class LoginView extends Main implements BeforeEnterObserver {
 
         loginOverlay.setAction("login");
         loginOverlay.addForgotPasswordListener(event ->
-            // We need to provide some way of informing the user
-            new MessageDialog("Forgotten password:","<p>Not sure how to get it back</p>") );
+            MessageDialog.show("Forgotten password:","<p>Not sure how to get it back</p>") );
         loginOverlay.setOpened(true);
     }
 

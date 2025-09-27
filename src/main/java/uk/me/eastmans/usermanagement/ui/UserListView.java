@@ -99,7 +99,7 @@ class UserListView extends Main {
     private Button createRemoveButton(User user) {
         Button removeButton = new Button(new Icon(VaadinIcon.TRASH));
         removeButton.setTooltipText("Remove this User");
-        removeButton.addClickListener(e -> new ConfirmDeleteDialog(
+        removeButton.addClickListener(e -> ConfirmDeleteDialog.show(
                 "Delete User", "This will permanently delete '" + user.getUsername() + "'",
                 event -> removeUser(user) ));
         return removeButton;

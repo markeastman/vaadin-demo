@@ -5,7 +5,7 @@ import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 
 public class ConfirmDeleteDialog extends ConfirmDialog {
 
-    public ConfirmDeleteDialog(String header, String message,
+    private ConfirmDeleteDialog(String header, String message,
                                ComponentEventListener<ConfirmEvent> listener) {
         setHeader(header);
         setText(message);
@@ -13,6 +13,10 @@ public class ConfirmDeleteDialog extends ConfirmDialog {
         setConfirmText("Delete");
         setConfirmButtonTheme("error primary");
         addConfirmListener(listener);
-        open();
+    }
+
+    public static void show(String header, String message, ComponentEventListener<ConfirmEvent> listener) {
+        ConfirmDeleteDialog dialog = new ConfirmDeleteDialog(header, message, listener);
+        dialog.open();
     }
 }

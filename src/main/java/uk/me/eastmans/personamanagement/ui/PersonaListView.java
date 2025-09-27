@@ -75,7 +75,7 @@ class PersonaListView extends Main {
     private Button createRemoveButton(Persona persona) {
         Button removeButton = new Button(new Icon(VaadinIcon.TRASH));
         removeButton.setTooltipText("Remove this Persona");
-        removeButton.addClickListener(e -> new ConfirmDeleteDialog(
+        removeButton.addClickListener(e -> ConfirmDeleteDialog.show(
                 "Delete Persona", "This will permanently delete '" + persona.getName() + "'",
                 event -> removePersona(persona) ));
         return removeButton;
