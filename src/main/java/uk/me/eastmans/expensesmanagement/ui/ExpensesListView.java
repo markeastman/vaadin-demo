@@ -19,6 +19,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -44,61 +45,66 @@ class ExpensesListView extends Main {
 
     final AuthenticationContext authenticationContext;
     final ExpenseService expenseService;
-    final User user;
-    final Grid<ExpenseHeader> expensesGrid;
-    final GridListDataView<ExpenseHeader> dataView;
+    User user;
+    Grid<ExpenseHeader> expensesGrid;
+    GridListDataView<ExpenseHeader> dataView;
 
     ExpensesListView(AuthenticationContext authenticationContext,
                      ExpenseService expenseService) {
 
         this.authenticationContext = authenticationContext;
-        if (authenticationContext.getAuthenticatedUser(MyUserPrincipal.class).isPresent())
-            user = authenticationContext.getAuthenticatedUser(MyUserPrincipal.class).get().getUser();
         this.expenseService = expenseService;
+        if (authenticationContext.getAuthenticatedUser(MyUserPrincipal.class).isPresent()) {
+            user = authenticationContext.getAuthenticatedUser(MyUserPrincipal.class).get().getUser();
 
-        expensesGrid = new Grid<>();
-        Grid.Column<ExpenseHeader> nameColumn = expensesGrid.addColumn(ExpenseHeader::getName);
-        Grid.Column<ExpenseHeader> descriptionColumn = expensesGrid.addColumn(ExpenseHeader::getDescription);
-        Grid.Column<ExpenseHeader> actionsColumn = expensesGrid.addColumn(new ComponentRenderer<>(header -> new Span()));
-        List<ExpenseHeader> expenses = expenseService.listAll(user);
-        dataView = expensesGrid.setItems( expenses );
-        ExpenseHeaderFilter expenseFilter = new ExpenseHeaderFilter(dataView);
+            expensesGrid = new Grid<>();
+            Grid.Column<ExpenseHeader> nameColumn = expensesGrid.addColumn(ExpenseHeader::getName);
+            Grid.Column<ExpenseHeader> descriptionColumn = expensesGrid.addColumn(ExpenseHeader::getDescription);
+            Grid.Column<ExpenseHeader> totalAmountColumn = expensesGrid.addColumn(
+                    new NumberRenderer<>(ExpenseHeader::getTotalAmount, "%(,.2f"));
+            Grid.Column<ExpenseHeader> actionsColumn = expensesGrid.addColumn(new ComponentRenderer<>(header -> new Span()));
+            List<ExpenseHeader> expenses = expenseService.listAll(user);
+            dataView = expensesGrid.setItems(expenses);
+            ExpenseHeaderFilter expenseFilter = new ExpenseHeaderFilter(dataView);
 
-        expensesGrid.getHeaderRows().clear();
-        HeaderRow headerRow = expensesGrid.appendHeaderRow();
-        headerRow.getCell(nameColumn).setComponent(
-                createFilterHeader("Name", expenseFilter::setName));
-        headerRow.getCell(descriptionColumn).setComponent(
-                createFilterHeader("Description", expenseFilter::setDescription));
+            expensesGrid.getHeaderRows().clear();
+            HeaderRow headerRow = expensesGrid.appendHeaderRow();
+            headerRow.getCell(nameColumn).setComponent(
+                    createFilterHeader("Name", expenseFilter::setName));
+            headerRow.getCell(descriptionColumn).setComponent(
+                    createFilterHeader("Description", expenseFilter::setDescription));
+            headerRow.getCell(totalAmountColumn).setComponent(
+                    createFilterHeader("Price"));
 
-        HorizontalLayout actionsHeaderLayout = new HorizontalLayout();
-        actionsHeaderLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        actionsHeaderLayout.add(new Text("Actions") );
-        Button newButton = new Button(new Icon(VaadinIcon.PLUS));
-        newButton.setTooltipText("Create a new Expense");
-        newButton.addClickListener(event -> {
-            // Create a new User
-            createExpense();
-        });
-        actionsHeaderLayout.add(newButton);
-        headerRow.getCell(actionsColumn).setComponent(actionsHeaderLayout);
+            HorizontalLayout actionsHeaderLayout = new HorizontalLayout();
+            actionsHeaderLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+            actionsHeaderLayout.add(new Text("Actions"));
+            Button newButton = new Button(new Icon(VaadinIcon.PLUS));
+            newButton.setTooltipText("Create a new Expense");
+            newButton.addClickListener(event -> {
+                // Create a new User
+                createExpense();
+            });
+            actionsHeaderLayout.add(newButton);
+            headerRow.getCell(actionsColumn).setComponent(actionsHeaderLayout);
 
-        expensesGrid.addComponentColumn(user -> {
-            HorizontalLayout actionsLayout = new HorizontalLayout();
-            Button editButton = new Button(new Icon(VaadinIcon.EDIT));
-            editButton.setTooltipText("Edit this Expense");
-            //editButton.addClickListener(event -> UserEditView.editUser(user.getId()));
-            actionsLayout.add(editButton);
-            actionsLayout.add(createRemoveButton(user));
-            return actionsLayout;
-        }).setHeader(actionsHeaderLayout).setWidth("150px").setFlexGrow(0);
+            expensesGrid.addComponentColumn(expenseHeader -> {
+                HorizontalLayout actionsLayout = new HorizontalLayout();
+                Button editButton = new Button(new Icon(VaadinIcon.EDIT));
+                editButton.setTooltipText("Edit this Expense");
+                editButton.addClickListener(event -> ExpenseEditView.editExpense(expenseHeader.getId()));
+                actionsLayout.add(editButton);
+                actionsLayout.add(createRemoveButton(expenseHeader));
+                return actionsLayout;
+            }).setHeader(actionsHeaderLayout).setWidth("150px").setFlexGrow(0);
 
-        setSizeFull();
-        addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
-                LumoUtility.Padding.MEDIUM, LumoUtility.Gap.SMALL);
+            setSizeFull();
+            addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
+                    LumoUtility.Padding.MEDIUM, LumoUtility.Gap.SMALL);
 
-        add(new ViewToolbar("Expenses List", ViewToolbar.group()));
-        add(expensesGrid);
+            add(new ViewToolbar("Expenses List", ViewToolbar.group()));
+            add(expensesGrid);
+        }
     }
 
     private Button createRemoveButton(ExpenseHeader expenseHeader) {
@@ -111,7 +117,7 @@ class ExpensesListView extends Main {
     }
 
     private void removeExpense(ExpenseHeader expenseHeader) {
-        // Remove the persona and update grid.
+        // Remove the expense and update grid.
         expenseService.deleteExpense(expenseHeader);
         expensesGrid.setItems(expenseService.listAll(user));
 
@@ -121,7 +127,11 @@ class ExpensesListView extends Main {
 
     private void createExpense() {
         // We need to create a user page
-        //UserEditView.editUser(0L);
+        ExpenseEditView.editExpense(0L);
+    }
+
+    private static Component createFilterHeader(String labelText) {
+        return createFilterHeader(labelText, null);
     }
 
     private static Component createFilterHeader(String labelText,
@@ -129,13 +139,18 @@ class ExpensesListView extends Main {
         NativeLabel label = new NativeLabel(labelText);
         label.getStyle().set("padding-top", "var(--lumo-space-m)");
         TextField textField = new TextField();
-        textField.setValueChangeMode(ValueChangeMode.EAGER);
-        textField.setClearButtonVisible(true);
         textField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
-        textField.setWidthFull();
-        textField.getStyle().set("max-width", "100%");
-        textField.addValueChangeListener(
-                e -> filterChangeConsumer.accept(e.getValue()));
+        if  (filterChangeConsumer != null) {
+            textField.setValueChangeMode(ValueChangeMode.EAGER);
+            textField.setClearButtonVisible(true);
+            textField.setWidthFull();
+            textField.getStyle().set("max-width", "100%");
+            textField.addValueChangeListener(
+                    e -> filterChangeConsumer.accept(e.getValue()));
+        } else {
+            textField.setValue("");
+            textField.setReadOnly(true);
+        }
         VerticalLayout layout = new VerticalLayout(label, textField);
         layout.getThemeList().clear();
         layout.getThemeList().add("spacing-xs");

@@ -2,6 +2,7 @@ package uk.me.eastmans.expensesmanagement;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -25,6 +26,15 @@ public class ExpenseLine {
     @Temporal(TemporalType.DATE)
     private Date expenseDate;
 
+    @Column(name="currencyValue", nullable=false, columnDefinition="Decimal(10,2) default '0.00'")
+    private BigDecimal currencyAmount;
+
+    @Column(name = "currencyCode", nullable = false, length = 3)
+    private String currencyCode;
+
+    @Column(name="baseValue", nullable=false, columnDefinition="Decimal(10,2) default '0.00'")
+    private BigDecimal baseAmount;
+
     protected ExpenseLine() { // To keep Hibernate happy
     }
 
@@ -32,6 +42,9 @@ public class ExpenseLine {
         this.header = header;
         header.addExpenseLine(this);
         this.description = description;
+        this.currencyAmount = BigDecimal.ZERO;
+        this.currencyCode = "";
+        this.baseAmount = BigDecimal.ZERO;
     }
 
     public ExpenseHeader getHeader() {return header;}
@@ -44,6 +57,30 @@ public class ExpenseLine {
 
     public String getDescription() {
         return description;
+    }
+
+    public BigDecimal getBaseAmount() {
+        return baseAmount;
+    }
+
+    public void setBaseAmount(BigDecimal baseAmount) {
+        this.baseAmount = baseAmount;
+    }
+
+    public BigDecimal getCurrencyAmount() {
+        return currencyAmount;
+    }
+
+    public void setCurrencyAmount(BigDecimal currencyAmount) {
+        this.currencyAmount = currencyAmount;
+    }
+
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
     }
 
     public Date getExpenseDate() {return expenseDate;}

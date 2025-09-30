@@ -66,3 +66,5 @@ layout control, button controls and navigation.
 way we handle business errors and not just simply field errors.
 1. We could do with looking at validation errors via annotations on the business entities.
 2. Check to make sure we have the write stateless aspects
+1. Need to work out how to display currency values with the 
+thousands separator. Used to display expense header

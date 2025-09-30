@@ -5,7 +5,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import uk.me.eastmans.security.User;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @PreAuthorize("isAuthenticated()")
@@ -15,6 +17,11 @@ public class ExpenseService {
 
     ExpenseService(ExpenseHeaderRepository expenseHeaderRepository) {
         this.expenseHeaderRepository = expenseHeaderRepository;
+    }
+
+    @Transactional
+    public Optional<ExpenseHeader> getExpense(long id) {
+        return expenseHeaderRepository.findById(id);
     }
 
     @Transactional(readOnly = true)
@@ -30,6 +37,12 @@ public class ExpenseService {
 
     @Transactional
     public void saveOrCreate(ExpenseHeader expense) {
+        // We need to calculate the total expense amount from the lines
+        BigDecimal total = BigDecimal.ZERO;
+        for (ExpenseLine line : expense.getExpenseLines()) {
+            total = total.add(line.getBaseAmount());
+        }
+        expense.setTotalAmount(total);
         expenseHeaderRepository.saveAndFlush(expense);
     }
 }

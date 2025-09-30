@@ -5,11 +5,12 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 import uk.me.eastmans.expensesmanagement.ExpenseHeader;
-import uk.me.eastmans.expensesmanagement.ExpenseHeaderRepository;
 import uk.me.eastmans.expensesmanagement.ExpenseLine;
+import uk.me.eastmans.expensesmanagement.ExpenseService;
 import uk.me.eastmans.personamanagement.PersonaRepository;
 import uk.me.eastmans.security.*;
 
+import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -17,17 +18,17 @@ import java.util.HashSet;
 @Component
 public class DataLoader implements ApplicationRunner {
 
-    final ExpenseHeaderRepository expenseHeaderRepository;
+    final ExpenseService expenseService;
     final AuthorityRepository authorityRepository;
     final PersonaRepository personaRepository;
     final UserRepository userRepository;
 
     @Autowired
-    public DataLoader(ExpenseHeaderRepository expenseHeaderRepository,
+    public DataLoader(ExpenseService expenseService,
                       AuthorityRepository authorityRepository,
                       PersonaRepository personaRepository,
                       UserRepository userRepository) {
-        this.expenseHeaderRepository = expenseHeaderRepository;
+        this.expenseService = expenseService;
         this.authorityRepository = authorityRepository;
         this.personaRepository = personaRepository;
         this.userRepository = userRepository;
@@ -92,9 +93,15 @@ public class DataLoader implements ApplicationRunner {
         // Add some expenses
         ExpenseHeader expense = new ExpenseHeader(adminUser, "Greece trip", "Devoxx conference in Greece");
         ExpenseLine line1 = new ExpenseLine(expense,"Hotel");
+        line1.setCurrencyAmount( new BigDecimal("230.00" ));
+        line1.setCurrencyCode("EUR");
+        line1.setBaseAmount( new BigDecimal("250.00" ));
         line1.setExpenseDate(new GregorianCalendar(2025, Calendar.FEBRUARY, 11).getTime());
         ExpenseLine line2 = new ExpenseLine(expense,"Flights");
         line2.setExpenseDate(new GregorianCalendar(2025, Calendar.FEBRUARY, 11).getTime());
-        expenseHeaderRepository.save(expense);
+        line2.setCurrencyAmount( new BigDecimal("1230.00" ));
+        line2.setCurrencyCode("EUR");
+        line2.setBaseAmount( new BigDecimal("1280.00" ));
+        expenseService.saveOrCreate(expense);
     }
 }

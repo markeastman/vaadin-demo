@@ -3,6 +3,7 @@ package uk.me.eastmans.expensesmanagement;
 import jakarta.persistence.*;
 import uk.me.eastmans.security.User;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,9 @@ public class ExpenseHeader {
 
     @OneToMany(mappedBy = "header", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<ExpenseLine> expenseLines;
+
+    @Column(name="currencyValue", nullable=false, columnDefinition="Decimal(10,2) default '0.00'")
+    private BigDecimal totalAmount;
 
     @ManyToOne
     @JoinColumn(name="owner", nullable=false)
@@ -72,6 +76,12 @@ public class ExpenseHeader {
     public void addExpenseLine(ExpenseLine line ) {
         expenseLines.add(line);
         line.setHeader(this);
+    }
+
+    public BigDecimal getTotalAmount() { return totalAmount; }
+
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
     }
 
     @Override

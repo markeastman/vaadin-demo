@@ -136,7 +136,7 @@ public class UserEditView extends Main implements HasUrlParameter<String> {
     }
 
     public void setUser(User user) {
-        if (user.getUsername() == null) {
+        if (user.getId() == null) {
             viewToolbar.setTitle("Create User");
             saveButton.setText("Save");
             saveButton.setEnabled(false);
