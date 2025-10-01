@@ -14,8 +14,11 @@ import java.util.Optional;
 public class ExpenseService {
 
     private final ExpenseHeaderRepository expenseHeaderRepository;
+    private final ExpenseCategoryRepository expenseCategoryRepository;
 
-    ExpenseService(ExpenseHeaderRepository expenseHeaderRepository) {
+    ExpenseService(ExpenseCategoryRepository expenseCategoryRepository,
+            ExpenseHeaderRepository expenseHeaderRepository) {
+        this.expenseCategoryRepository = expenseCategoryRepository;
         this.expenseHeaderRepository = expenseHeaderRepository;
     }
 
@@ -44,5 +47,11 @@ public class ExpenseService {
         }
         expense.setTotalAmount(total);
         expenseHeaderRepository.saveAndFlush(expense);
+    }
+
+    @Transactional
+    public void saveOrCreate(ExpenseCategory expenseCategory) {
+        // We need to calculate the total expense amount from the lines
+        expenseCategoryRepository.saveAndFlush(expenseCategory);
     }
 }

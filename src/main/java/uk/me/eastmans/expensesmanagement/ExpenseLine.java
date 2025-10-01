@@ -20,6 +20,10 @@ public class ExpenseLine {
     private String description = "";
 
     @ManyToOne
+    @JoinColumn(name="category", nullable=false)
+    private ExpenseCategory category;
+
+    @ManyToOne
     @JoinColumn(name="header", nullable=false)
     private ExpenseHeader header;
 
@@ -38,8 +42,10 @@ public class ExpenseLine {
     protected ExpenseLine() { // To keep Hibernate happy
     }
 
-    public ExpenseLine(ExpenseHeader header, String description) {
+    public ExpenseLine(ExpenseHeader header,
+                       ExpenseCategory category, String description) {
         this.header = header;
+        this.category = category;
         header.addExpenseLine(this);
         this.description = description;
         this.currencyAmount = BigDecimal.ZERO;
@@ -57,6 +63,14 @@ public class ExpenseLine {
 
     public String getDescription() {
         return description;
+    }
+
+    public ExpenseCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(ExpenseCategory category) {
+        this.category = category;
     }
 
     public BigDecimal getBaseAmount() {

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+import uk.me.eastmans.expensesmanagement.ExpenseCategory;
 import uk.me.eastmans.expensesmanagement.ExpenseHeader;
 import uk.me.eastmans.expensesmanagement.ExpenseLine;
 import uk.me.eastmans.expensesmanagement.ExpenseService;
@@ -90,14 +91,20 @@ public class DataLoader implements ApplicationRunner {
             userRepository.save(u);
         }
 
+        // Add some expense categories
+        ExpenseCategory flights = new ExpenseCategory("flights");
+        ExpenseCategory hotels = new ExpenseCategory("hotels");
+        expenseService.saveOrCreate(flights);
+        expenseService.saveOrCreate(hotels);
+
         // Add some expenses
         ExpenseHeader expense = new ExpenseHeader(adminUser, "Greece trip", "Devoxx conference in Greece");
-        ExpenseLine line1 = new ExpenseLine(expense,"Hotel");
+        ExpenseLine line1 = new ExpenseLine(expense, hotels, "Hotel in New York");
         line1.setCurrencyAmount( new BigDecimal("230.00" ));
         line1.setCurrencyCode("EUR");
         line1.setBaseAmount( new BigDecimal("250.00" ));
         line1.setExpenseDate(new GregorianCalendar(2025, Calendar.FEBRUARY, 11).getTime());
-        ExpenseLine line2 = new ExpenseLine(expense,"Flights");
+        ExpenseLine line2 = new ExpenseLine(expense, flights,"Flight to new york");
         line2.setExpenseDate(new GregorianCalendar(2025, Calendar.FEBRUARY, 11).getTime());
         line2.setCurrencyAmount( new BigDecimal("1230.00" ));
         line2.setCurrencyCode("EUR");
