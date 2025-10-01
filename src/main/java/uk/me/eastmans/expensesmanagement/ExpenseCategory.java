@@ -34,6 +34,8 @@ public class ExpenseCategory {
         this.description = description;
     }
 
+    public String toString() { return description; }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null || !getClass().isAssignableFrom(obj.getClass())) {

@@ -1,14 +1,18 @@
 package uk.me.eastmans.expensesmanagement.ui;
 
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Main;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.page.History;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -19,6 +23,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import uk.me.eastmans.base.ui.component.ViewToolbar;
 import uk.me.eastmans.expensesmanagement.ExpenseHeader;
+import uk.me.eastmans.expensesmanagement.ExpenseLine;
 import uk.me.eastmans.expensesmanagement.ExpenseService;
 import uk.me.eastmans.security.MyUserPrincipal;
 import uk.me.eastmans.security.User;
@@ -39,6 +44,7 @@ public class ExpenseEditView extends Main implements HasUrlParameter<String> {
     final BigDecimalField totalAmount;
     final Button saveButton;
     final Binder<ExpenseHeader> editBinder = new Binder<>(ExpenseHeader.class);
+    final Grid<ExpenseLine> linesGrid;
 
     public static void editExpense(Long expenseId) {
         UI.getCurrent().navigate(ExpenseEditView.class, String.valueOf(expenseId));
@@ -83,8 +89,8 @@ public class ExpenseEditView extends Main implements HasUrlParameter<String> {
         viewToolbar = new ViewToolbar("Expense Edit", ViewToolbar.group());
         add(viewToolbar);
 
-        Scroller scroller = new Scroller(formLayout);
-        add(scroller);
+        //Scroller scroller = new Scroller(formLayout);
+        add(formLayout);
 
         saveButton = new Button("Save", e -> {
             // We need to persis the changes back to the database
@@ -98,6 +104,42 @@ public class ExpenseEditView extends Main implements HasUrlParameter<String> {
 
         HorizontalLayout buttonLayout = new HorizontalLayout(saveButton, cancel);
         add(buttonLayout);
+
+        // Add the lines
+        linesGrid = new Grid<>(ExpenseLine.class, false);
+        linesGrid.setSizeFull();
+        linesGrid.addColumn(ExpenseLine::getCategory).setHeader("Category").setResizable(true)
+                .setAutoWidth(true).setFlexGrow(0);
+        linesGrid.addColumn(ExpenseLine::getDescription).setHeader("Description").setResizable(true)
+                .setAutoWidth(true).setFlexGrow(0);
+        linesGrid.addColumn(ExpenseLine::getCurrencyAmount).setHeader("Currency Amount");
+        linesGrid.addColumn(ExpenseLine::getCurrencyCode).setHeader("Currency");
+        linesGrid.addColumn(ExpenseLine::getBaseAmount).setHeader("Base Amount");
+        HorizontalLayout actionsHeaderLayout = new HorizontalLayout();
+        actionsHeaderLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        actionsHeaderLayout.add(new Text("Actions") );
+        Button newButton = new Button(new Icon(VaadinIcon.PLUS));
+        newButton.setTooltipText("Add a new line");
+        newButton.addClickListener(event -> {
+            // Create a new expense line
+            //Persona newPersona = new Persona("", new HashSet<>());
+            //editDialog.open(newPersona, true);
+        });
+        actionsHeaderLayout.add(newButton);
+//        personaGrid.addComponentColumn(persona -> {
+//            HorizontalLayout actionsLayout = new HorizontalLayout();
+//            Button editButton = new Button(new Icon(VaadinIcon.EDIT));
+//            editButton.setTooltipText("Edit this Persona");
+//            editButton.addClickListener(e -> editDialog.open(persona, false));
+//            actionsLayout.add(editButton);
+//            actionsLayout.add(createRemoveButton(persona));
+//            return actionsLayout;
+//        }).setHeader(actionsHeaderLayout).setWidth("150px").setFlexGrow(0);
+
+        linesGrid.setSizeFull();
+        add(linesGrid);
+
+        setHeightFull();
     }
 
     public ExpenseHeader getExpenseHeader() {
@@ -111,6 +153,7 @@ public class ExpenseEditView extends Main implements HasUrlParameter<String> {
             saveButton.setEnabled(false);
         }
         this.expenseHeader = header;
+        linesGrid.setItems(expenseHeader.getExpenseLines());
         editBinder.readBean(expenseHeader);
 
         name.focus();

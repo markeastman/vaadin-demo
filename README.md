@@ -68,3 +68,4 @@ way we handle business errors and not just simply field errors.
 2. Check to make sure we have the write stateless aspects
 1. Need to work out how to display currency values with the 
 thousands separator. Used to display expense header
+2. Need to work out how to place a grid inside a flow layout so that the grid will have a reasonable size.
