@@ -5,6 +5,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.icon.Icon;
@@ -14,9 +15,9 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.page.History;
-import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -41,7 +42,7 @@ public class ExpenseEditView extends Main implements HasUrlParameter<String> {
     final ViewToolbar viewToolbar;
     final TextField name;
     final TextField description;
-    final BigDecimalField totalAmount;
+    final TextField totalAmount;
     final Button saveButton;
     final Binder<ExpenseHeader> editBinder = new Binder<>(ExpenseHeader.class);
     final Grid<ExpenseLine> linesGrid;
@@ -68,10 +69,10 @@ public class ExpenseEditView extends Main implements HasUrlParameter<String> {
                 .withValidator(description -> description.length() <= ExpenseHeader.DESCRIPTION_MAX_LENGTH,
                         "Description length must be less than " + (ExpenseHeader.DESCRIPTION_MAX_LENGTH+1) + ".")
                 .bind( ExpenseHeader::getDescription, ExpenseHeader::setDescription );
-        totalAmount = new BigDecimalField("Total");
+        totalAmount = new TextField("Total");
         totalAmount.setReadOnly(true);
         editBinder.forField(totalAmount)
-                .bind(ExpenseHeader::getTotalAmount, null);
+                .bind(ExpenseHeader::getFormattedTotalAmount, null);
 
         FormLayout formLayout = new FormLayout();
         formLayout.setExpandColumns(true);
@@ -112,9 +113,15 @@ public class ExpenseEditView extends Main implements HasUrlParameter<String> {
                 .setAutoWidth(true).setFlexGrow(0);
         linesGrid.addColumn(ExpenseLine::getDescription).setHeader("Description").setResizable(true)
                 .setAutoWidth(true).setFlexGrow(0);
-        linesGrid.addColumn(ExpenseLine::getCurrencyAmount).setHeader("Currency Amount");
+        linesGrid.addColumn(
+                new NumberRenderer<>(ExpenseLine::getCurrencyAmount, "%(,.2f"))
+                .setTextAlign(ColumnTextAlign.END)
+                .setHeader("Currency Amount");
         linesGrid.addColumn(ExpenseLine::getCurrencyCode).setHeader("Currency");
-        linesGrid.addColumn(ExpenseLine::getBaseAmount).setHeader("Base Amount");
+        linesGrid.addColumn(
+                new NumberRenderer<>(ExpenseLine::getBaseAmount, "%(,.2f"))
+                .setTextAlign(ColumnTextAlign.END)
+                .setHeader("Base Amount");
         HorizontalLayout actionsHeaderLayout = new HorizontalLayout();
         actionsHeaderLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         actionsHeaderLayout.add(new Text("Actions") );

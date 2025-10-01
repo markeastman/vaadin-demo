@@ -69,3 +69,8 @@ way we handle business errors and not just simply field errors.
 1. Need to work out how to display currency values with the 
 thousands separator. Used to display expense header
 2. Need to work out how to place a grid inside a flow layout so that the grid will have a reasonable size.
+3. BigDecimalField does not format fields with thousands divider
+and so I use a TextField for now and have a method on the
+ExpenseHeader to format the value properly. However for the
+grid related BigDecimal fields we can set a renderer which
+will apply the right formatting.

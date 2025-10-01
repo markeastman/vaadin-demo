@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import uk.me.eastmans.security.User;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,6 +80,12 @@ public class ExpenseHeader {
     }
 
     public BigDecimal getTotalAmount() { return totalAmount; }
+
+
+    public String getFormattedTotalAmount() {
+        DecimalFormat df = new DecimalFormat("#,###.00");
+        return df.format(totalAmount);
+    }
 
     public void setTotalAmount(BigDecimal totalAmount) {
         this.totalAmount = totalAmount;
