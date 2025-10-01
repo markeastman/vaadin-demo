@@ -109,17 +109,21 @@ public class ExpenseEditView extends Main implements HasUrlParameter<String> {
         // Add the lines
         linesGrid = new Grid<>(ExpenseLine.class, false);
         linesGrid.setSizeFull();
-        linesGrid.addColumn(ExpenseLine::getCategory).setHeader("Category").setResizable(true)
-                .setAutoWidth(true).setFlexGrow(0);
-        linesGrid.addColumn(ExpenseLine::getDescription).setHeader("Description").setResizable(true)
-                .setAutoWidth(true).setFlexGrow(0);
+        linesGrid.addColumn(ExpenseLine::getCategory).setHeader("Category")
+                .setResizable(true).setAutoWidth(true).setFlexGrow(0);
+        linesGrid.addColumn(ExpenseLine::getDescription).setHeader("Description")
+                .setResizable(true).setAutoWidth(true).setFlexGrow(0);
         linesGrid.addColumn(
                 new NumberRenderer<>(ExpenseLine::getCurrencyAmount, "%(,.2f"))
+                .setResizable(true).setAutoWidth(true).setFlexGrow(0)
                 .setTextAlign(ColumnTextAlign.END)
                 .setHeader("Currency Amount");
-        linesGrid.addColumn(ExpenseLine::getCurrencyCode).setHeader("Currency");
+        linesGrid.addColumn(ExpenseLine::getCurrencyCode)
+                .setResizable(true).setAutoWidth(true).setFlexGrow(0)
+                .setHeader("Currency");
         linesGrid.addColumn(
                 new NumberRenderer<>(ExpenseLine::getBaseAmount, "%(,.2f"))
+                .setResizable(true).setAutoWidth(true).setFlexGrow(0)
                 .setTextAlign(ColumnTextAlign.END)
                 .setHeader("Base Amount");
         HorizontalLayout actionsHeaderLayout = new HorizontalLayout();
