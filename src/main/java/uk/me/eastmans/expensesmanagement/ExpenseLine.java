@@ -3,7 +3,8 @@ package uk.me.eastmans.expensesmanagement;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
+import java.util.Currency;
 
 @Entity
 @Table(name = "expense_line")
@@ -28,7 +29,7 @@ public class ExpenseLine {
     private ExpenseHeader header;
 
     @Temporal(TemporalType.DATE)
-    private Date expenseDate;
+    private LocalDate expenseDate;
 
     @Column(name="currencyValue", nullable=false, columnDefinition="Decimal(10,2) default '0.00'")
     private BigDecimal currencyAmount;
@@ -72,6 +73,7 @@ public class ExpenseLine {
         this.category = category;
     }
 
+
     public BigDecimal getBaseAmount() {
         return baseAmount;
     }
@@ -96,9 +98,17 @@ public class ExpenseLine {
         this.currencyCode = currencyCode;
     }
 
-    public Date getExpenseDate() {return expenseDate;}
+    public Currency getCurrency() {
+        return Currency.getInstance(currencyCode);
+    }
 
-    public void setExpenseDate(Date when) {this.expenseDate = when;}
+    public void setCurrency(Currency currency) {
+        this.currencyCode = currency.getCurrencyCode();
+    }
+
+    public LocalDate getExpenseDate() {return expenseDate;}
+
+    public void setExpenseDate(LocalDate when) {this.expenseDate = when;}
 
     public void setDescription(String description) {this.description = description;}
 

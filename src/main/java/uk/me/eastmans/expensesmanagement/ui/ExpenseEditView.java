@@ -119,6 +119,8 @@ public class ExpenseEditView extends Main implements HasUrlParameter<String> {
         linesGrid.setSizeFull();
         linesGrid.addColumn(ExpenseLine::getCategory).setHeader("Category")
                 .setResizable(true).setAutoWidth(true).setFlexGrow(0);
+        linesGrid.addColumn(ExpenseLine::getExpenseDate).setHeader("Date")
+                .setResizable(true).setAutoWidth(true).setFlexGrow(0);
         linesGrid.addColumn(ExpenseLine::getDescription).setHeader("Description")
                 .setResizable(true).setAutoWidth(true).setFlexGrow(0);
         linesGrid.addColumn(

@@ -3,6 +3,8 @@ package uk.me.eastmans.expensesmanagement.ui;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
@@ -16,6 +18,9 @@ import uk.me.eastmans.expensesmanagement.ExpenseLine;
 import uk.me.eastmans.expensesmanagement.ExpenseService;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Currency;
 
 public class ExpenseLineEditDialog extends Dialog {
 
@@ -25,6 +30,8 @@ public class ExpenseLineEditDialog extends Dialog {
 
     Binder<ExpenseLine> editBinder = new Binder<>(ExpenseLine.class);
     TextField descriptionField;
+    DatePicker expenseDate;
+    ComboBox<Currency> currencyField;
     BigDecimalField transactionAmountField;
     BigDecimalField amountField;
     Button saveButton;
@@ -42,6 +49,17 @@ public class ExpenseLineEditDialog extends Dialog {
         formLayout.setAutoResponsive(true);
 
         // Build the dialog
+        LocalDate now = LocalDate.now(ZoneId.systemDefault());
+
+        expenseDate = new DatePicker("Expense Date");
+        expenseDate.setMax(now);
+        expenseDate.setHelperText("Must be in the past");
+        editBinder.forField(expenseDate)
+                .asRequired("Every expense line must have a date")
+                //.withValidator(date -> {
+                //        },
+                //        "Description length must be less than " + (ExpenseLine.DESCRIPTION_MAX_LENGTH+1) + ".")
+                .bind( ExpenseLine::getExpenseDate, ExpenseLine::setExpenseDate );
         descriptionField = new TextField("Description");
         editBinder.forField(descriptionField)
                 .asRequired("Every expense line must have a description")
@@ -54,6 +72,12 @@ public class ExpenseLineEditDialog extends Dialog {
                 .withValidator(value -> value.compareTo(BigDecimal.ZERO) > 0,
                         "Transaction value must be greater than zero")
                 .bind( ExpenseLine::getCurrencyAmount, ExpenseLine::setCurrencyAmount );
+        currencyField = new ComboBox<>("Transaction Currency");
+        currencyField.setItems(Currency.getAvailableCurrencies());
+        currencyField.setItemLabelGenerator(Currency::getCurrencyCode);
+        editBinder.forField(currencyField)
+                .asRequired("Every expense line must have a transaction currency")
+                .bind( ExpenseLine::getCurrency, ExpenseLine::setCurrency );
         amountField = new BigDecimalField("Corporate Converted Amount");
         editBinder.forField(amountField)
                 .asRequired("Every expense line must have a transaction amount")
@@ -61,8 +85,10 @@ public class ExpenseLineEditDialog extends Dialog {
                         "Transaction value must be greater than zero")
                 .bind( ExpenseLine::getBaseAmount, ExpenseLine::setBaseAmount );
 
+        formLayout.add(expenseDate);
         formLayout.add(descriptionField);
         formLayout.add(transactionAmountField);
+        formLayout.add(currencyField);
         formLayout.add(amountField);
 
         // Create the buttons
@@ -76,6 +102,7 @@ public class ExpenseLineEditDialog extends Dialog {
         getFooter().add(cancelButton);
         getFooter().add(saveButton);
 
+        setWidth("20em");
         add(formLayout);
     }
 
@@ -105,7 +132,10 @@ public class ExpenseLineEditDialog extends Dialog {
         try {
             editBinder.writeBean(expenseLine);
             if (editBinder.validate().isOk()) {
-                //expenseService.saveOrCreate(expenseLine);
+                // Make sure this line relates to the expenseHeader
+                expenseLine.setHeader(expenseHeader);
+                // We should update the total for the header now
+                expenseService.saveOrCreate(expenseHeader);
                 Notification.show("Expense line saved", 3000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 close();

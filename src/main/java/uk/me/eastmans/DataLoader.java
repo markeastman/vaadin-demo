@@ -12,8 +12,7 @@ import uk.me.eastmans.personamanagement.PersonaRepository;
 import uk.me.eastmans.security.*;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.time.LocalDate;
 import java.util.HashSet;
 
 @Component
@@ -103,10 +102,10 @@ public class DataLoader implements ApplicationRunner {
         line1.setCurrencyAmount( new BigDecimal("230.00" ));
         line1.setCurrencyCode("EUR");
         line1.setBaseAmount( new BigDecimal("250.00" ));
-        line1.setExpenseDate(new GregorianCalendar(2025, Calendar.FEBRUARY, 11).getTime());
+        line1.setExpenseDate(LocalDate.of(2025, 2, 11));
         expense.addExpenseLine(line1);
         ExpenseLine line2 = new ExpenseLine(flights,"Flight to new york");
-        line2.setExpenseDate(new GregorianCalendar(2025, Calendar.FEBRUARY, 11).getTime());
+        line2.setExpenseDate(LocalDate.of(2025, 2, 10));
         line2.setCurrencyAmount( new BigDecimal("1230.00" ));
         line2.setCurrencyCode("EUR");
         line2.setBaseAmount( new BigDecimal("1280.00" ));
