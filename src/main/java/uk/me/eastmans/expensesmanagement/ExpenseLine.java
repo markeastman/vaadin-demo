@@ -42,11 +42,10 @@ public class ExpenseLine {
     protected ExpenseLine() { // To keep Hibernate happy
     }
 
-    public ExpenseLine(ExpenseHeader header,
-                       ExpenseCategory category, String description) {
-        this.header = header;
+    public ExpenseLine(String description) { this(null,description); }
+
+    public ExpenseLine(ExpenseCategory category, String description) {
         this.category = category;
-        header.addExpenseLine(this);
         this.description = description;
         this.currencyAmount = BigDecimal.ZERO;
         this.currencyCode = "";

@@ -68,6 +68,7 @@ public class ExpenseHeader {
 
     public void setExpenseLines(List<ExpenseLine> lines) {
         this.expenseLines = lines;
+        calculateTotalAmount();
     }
 
     public List<ExpenseLine> getExpenseLines() {
@@ -77,6 +78,13 @@ public class ExpenseHeader {
     public void addExpenseLine(ExpenseLine line ) {
         expenseLines.add(line);
         line.setHeader(this);
+        calculateTotalAmount();
+    }
+
+    public void deleteExpenseLine(ExpenseLine line ) {
+        expenseLines.remove(line);
+        // Update total amount
+        calculateTotalAmount();
     }
 
     public BigDecimal getTotalAmount() { return totalAmount; }
@@ -89,6 +97,15 @@ public class ExpenseHeader {
 
     public void setTotalAmount(BigDecimal totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    public void calculateTotalAmount() {
+        // We need to calculate the total expense amount from the lines
+        BigDecimal total = BigDecimal.ZERO;
+        for (ExpenseLine line : getExpenseLines()) {
+            total = total.add(line.getBaseAmount());
+        }
+        setTotalAmount(total);
     }
 
     @Override

@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import uk.me.eastmans.security.User;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,12 +39,7 @@ public class ExpenseService {
 
     @Transactional
     public void saveOrCreate(ExpenseHeader expense) {
-        // We need to calculate the total expense amount from the lines
-        BigDecimal total = BigDecimal.ZERO;
-        for (ExpenseLine line : expense.getExpenseLines()) {
-            total = total.add(line.getBaseAmount());
-        }
-        expense.setTotalAmount(total);
+        expense.calculateTotalAmount();
         expenseHeaderRepository.saveAndFlush(expense);
     }
 

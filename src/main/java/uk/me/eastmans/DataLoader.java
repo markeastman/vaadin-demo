@@ -99,16 +99,18 @@ public class DataLoader implements ApplicationRunner {
 
         // Add some expenses
         ExpenseHeader expense = new ExpenseHeader(adminUser, "Greece trip", "Devoxx conference in Greece");
-        ExpenseLine line1 = new ExpenseLine(expense, hotels, "Hotel in New York");
+        ExpenseLine line1 = new ExpenseLine( hotels, "Hotel in New York");
         line1.setCurrencyAmount( new BigDecimal("230.00" ));
         line1.setCurrencyCode("EUR");
         line1.setBaseAmount( new BigDecimal("250.00" ));
         line1.setExpenseDate(new GregorianCalendar(2025, Calendar.FEBRUARY, 11).getTime());
-        ExpenseLine line2 = new ExpenseLine(expense, flights,"Flight to new york");
+        expense.addExpenseLine(line1);
+        ExpenseLine line2 = new ExpenseLine(flights,"Flight to new york");
         line2.setExpenseDate(new GregorianCalendar(2025, Calendar.FEBRUARY, 11).getTime());
         line2.setCurrencyAmount( new BigDecimal("1230.00" ));
         line2.setCurrencyCode("EUR");
         line2.setBaseAmount( new BigDecimal("1280.00" ));
+        expense.addExpenseLine(line2);
         expenseService.saveOrCreate(expense);
     }
 }

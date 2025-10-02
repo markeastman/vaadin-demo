@@ -7,7 +7,9 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Main;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -17,11 +19,13 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.page.History;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
+import uk.me.eastmans.base.ui.component.ConfirmDeleteDialog;
 import uk.me.eastmans.base.ui.component.ViewToolbar;
 import uk.me.eastmans.expensesmanagement.ExpenseHeader;
 import uk.me.eastmans.expensesmanagement.ExpenseLine;
@@ -29,6 +33,7 @@ import uk.me.eastmans.expensesmanagement.ExpenseService;
 import uk.me.eastmans.security.MyUserPrincipal;
 import uk.me.eastmans.security.User;
 
+import java.util.List;
 import java.util.Optional;
 
 @Route("expense-edit")
@@ -46,6 +51,7 @@ public class ExpenseEditView extends Main implements HasUrlParameter<String> {
     final Button saveButton;
     final Binder<ExpenseHeader> editBinder = new Binder<>(ExpenseHeader.class);
     final Grid<ExpenseLine> linesGrid;
+    final ExpenseLineEditDialog expenseLineEditDialog;
 
     public static void editExpense(Long expenseId) {
         UI.getCurrent().navigate(ExpenseEditView.class, String.valueOf(expenseId));
@@ -56,6 +62,8 @@ public class ExpenseEditView extends Main implements HasUrlParameter<String> {
         this.expenseService = expenseService;
         if (authenticationContext.getAuthenticatedUser(MyUserPrincipal.class).isPresent())
             user = authenticationContext.getAuthenticatedUser(MyUserPrincipal.class).get().getUser();
+
+        expenseLineEditDialog = new ExpenseLineEditDialog(expenseService);
 
         name = new TextField("Name");
         editBinder.forField(name)
@@ -126,6 +134,7 @@ public class ExpenseEditView extends Main implements HasUrlParameter<String> {
                 .setResizable(true).setAutoWidth(true).setFlexGrow(0)
                 .setTextAlign(ColumnTextAlign.END)
                 .setHeader("Base Amount");
+        Grid.Column<ExpenseLine> actionsColumn = linesGrid.addColumn(new ComponentRenderer<>(header -> new Span()));
         HorizontalLayout actionsHeaderLayout = new HorizontalLayout();
         actionsHeaderLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         actionsHeaderLayout.add(new Text("Actions") );
@@ -133,24 +142,50 @@ public class ExpenseEditView extends Main implements HasUrlParameter<String> {
         newButton.setTooltipText("Add a new line");
         newButton.addClickListener(event -> {
             // Create a new expense line
-            //Persona newPersona = new Persona("", new HashSet<>());
-            //editDialog.open(newPersona, true);
+            ExpenseLine newLine = new ExpenseLine("" );
+            expenseLineEditDialog.editExpenseLine(newLine, expenseHeader, true);
         });
+
         actionsHeaderLayout.add(newButton);
-//        personaGrid.addComponentColumn(persona -> {
-//            HorizontalLayout actionsLayout = new HorizontalLayout();
-//            Button editButton = new Button(new Icon(VaadinIcon.EDIT));
-//            editButton.setTooltipText("Edit this Persona");
-//            editButton.addClickListener(e -> editDialog.open(persona, false));
-//            actionsLayout.add(editButton);
-//            actionsLayout.add(createRemoveButton(persona));
-//            return actionsLayout;
-//        }).setHeader(actionsHeaderLayout).setWidth("150px").setFlexGrow(0);
+        List<HeaderRow> headers = linesGrid.getHeaderRows();
+        if (!headers.isEmpty())
+            headers.getFirst().getCell(actionsColumn).setComponent(actionsHeaderLayout);
+
+        linesGrid.addComponentColumn(line -> {
+            HorizontalLayout actionsLayout = new HorizontalLayout();
+            Button editButton = new Button(new Icon(VaadinIcon.EDIT));
+            editButton.setTooltipText("Edit this expense line");
+            editButton.addClickListener(e -> expenseLineEditDialog.editExpenseLine(line, expenseHeader,false));
+            actionsLayout.add(editButton);
+            actionsLayout.add(createRemoveButton(line));
+            return actionsLayout;
+        }).setHeader(actionsHeaderLayout).setWidth("150px").setFlexGrow(0);
 
         linesGrid.setSizeFull();
         add(linesGrid);
-
         setHeightFull();
+
+    }
+
+    private Button createRemoveButton(ExpenseLine line) {
+        Button removeButton = new Button(new Icon(VaadinIcon.TRASH));
+        removeButton.setTooltipText("Remove this expense line");
+        removeButton.addClickListener(e -> ConfirmDeleteDialog.show(
+                "Delete expense line", "This will permanently delete '" + line.getDescription() + "'",
+                event -> removeExpenseLine(line) ));
+        return removeButton;
+    }
+
+    private void removeExpenseLine(ExpenseLine line) {
+        // Remove the expense line from the expense
+        expenseHeader.deleteExpenseLine(line);
+        // Update the grid
+        linesGrid.setItems(expenseHeader.getExpenseLines());
+        // Update the header section
+        editBinder.readBean(expenseHeader);
+
+        Notification.show("Expense '" + line.getDescription() + "' deleted", 3000, Notification.Position.BOTTOM_END)
+                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
     public ExpenseHeader getExpenseHeader() {
