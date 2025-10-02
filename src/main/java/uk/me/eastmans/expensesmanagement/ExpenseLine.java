@@ -99,6 +99,8 @@ public class ExpenseLine {
     }
 
     public Currency getCurrency() {
+        if (currencyCode == null || currencyCode.isEmpty())
+            return null;
         return Currency.getInstance(currencyCode);
     }
 

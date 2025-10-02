@@ -13,6 +13,7 @@ import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import uk.me.eastmans.expensesmanagement.ExpenseCategory;
 import uk.me.eastmans.expensesmanagement.ExpenseHeader;
 import uk.me.eastmans.expensesmanagement.ExpenseLine;
 import uk.me.eastmans.expensesmanagement.ExpenseService;
@@ -31,6 +32,7 @@ public class ExpenseLineEditDialog extends Dialog {
     Binder<ExpenseLine> editBinder = new Binder<>(ExpenseLine.class);
     TextField descriptionField;
     DatePicker expenseDate;
+    ComboBox<ExpenseCategory> categoryField;
     ComboBox<Currency> currencyField;
     BigDecimalField transactionAmountField;
     BigDecimalField amountField;
@@ -60,6 +62,12 @@ public class ExpenseLineEditDialog extends Dialog {
                 //        },
                 //        "Description length must be less than " + (ExpenseLine.DESCRIPTION_MAX_LENGTH+1) + ".")
                 .bind( ExpenseLine::getExpenseDate, ExpenseLine::setExpenseDate );
+        categoryField = new ComboBox<>("Category");
+        categoryField.setItems(expenseService.listAllCategories());
+        categoryField.setItemLabelGenerator(ExpenseCategory::getDescription);
+        editBinder.forField(categoryField)
+                .asRequired("Every expense line must have a category")
+                .bind( ExpenseLine::getCategory, ExpenseLine::setCategory );
         descriptionField = new TextField("Description");
         editBinder.forField(descriptionField)
                 .asRequired("Every expense line must have a description")
@@ -86,6 +94,7 @@ public class ExpenseLineEditDialog extends Dialog {
                 .bind( ExpenseLine::getBaseAmount, ExpenseLine::setBaseAmount );
 
         formLayout.add(expenseDate);
+        formLayout.add(categoryField);
         formLayout.add(descriptionField);
         formLayout.add(transactionAmountField);
         formLayout.add(currencyField);
@@ -121,7 +130,7 @@ public class ExpenseLineEditDialog extends Dialog {
 
             saveButton.setEnabled(hasChanges && isValid);
         });
-        descriptionField.focus();
+        expenseDate.focus();
 
         // Show the dialog
         open();
@@ -132,8 +141,9 @@ public class ExpenseLineEditDialog extends Dialog {
         try {
             editBinder.writeBean(expenseLine);
             if (editBinder.validate().isOk()) {
-                // Make sure this line relates to the expenseHeader
-                expenseLine.setHeader(expenseHeader);
+                // If the id is null then we need to add it to the expense header
+                if (expenseLine.getId() == null)
+                    expenseHeader.addExpenseLine(expenseLine);
                 // We should update the total for the header now
                 expenseService.saveOrCreate(expenseHeader);
                 Notification.show("Expense line saved", 3000, Notification.Position.BOTTOM_END)

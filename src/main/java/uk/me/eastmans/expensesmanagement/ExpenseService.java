@@ -31,6 +31,11 @@ public class ExpenseService {
         return expenseHeaderRepository.findAllByOwner(user);
     }
 
+    @Transactional(readOnly = true)
+    public List<ExpenseCategory> listAllCategories() {
+        return expenseCategoryRepository.findAll();
+    }
+
     @Transactional
     public void deleteExpense(ExpenseHeader expenseHeader) {
         expenseHeaderRepository.delete(expenseHeader);
