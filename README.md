@@ -57,6 +57,12 @@ This has a header and multiple lines. Each line can be a different
 type of expense so we will need to have different panels for
 each expense type.
 
+The ProcessListView experiments with some background job
+execution and updating the ui based on status updates from the 
+background task. We have tested the @Async style and also the reactive streams 
+style using Flux interaction. We have created a Thread pool for
+async processing within the Application class.
+
 # Things to do or investigate
 
 1. Need to think about when to use dialogs for editing and 

@@ -29,7 +29,7 @@ class ProcessListView extends Main {
     final private Text message = new Text("Messages");
     final private UI ui = UI.getCurrent();
 
-    ProcessListView(SAPProcess sapProcess) {
+    ProcessListView(SAPProcess sapProcess, ThreadPoolTaskExecutor taskExecutor) {
 
         add(new ViewToolbar("Process List"));
 
@@ -45,9 +45,6 @@ class ProcessListView extends Main {
         Button starterButton = new Button("Start a process");
         starterButton.addClickListener(
                 event -> sapProcess.executeProcess(completeConsumer,statusConsumer,errorConsumer));
-
-        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.afterPropertiesSet();
 
         Button starterButton2 = new Button("Start a background job");
         starterButton2.addClickListener(event -> sapProcess.startBackgroundJob()
