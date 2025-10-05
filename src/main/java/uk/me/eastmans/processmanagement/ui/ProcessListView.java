@@ -3,20 +3,26 @@ package uk.me.eastmans.processmanagement.ui;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Main;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import reactor.core.scheduler.Schedulers;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.TaskExecutor;
+import uk.me.eastmans.backgroundjobs.JobManager;
+import uk.me.eastmans.backgroundjobs.JobWrapper;
 import uk.me.eastmans.backgroundjobs.SAPProcess;
 import uk.me.eastmans.base.ui.component.ViewToolbar;
-
-import java.util.function.Consumer;
+import uk.me.eastmans.base.ui.component.YesBlankRenderer;
 
 @Route("process-list")
 @RolesAllowed("PROCESSES")
@@ -28,66 +34,69 @@ class ProcessListView extends Main {
 
     final private Text message = new Text("Messages");
     final private UI ui = UI.getCurrent();
+    final JobManager jobManager;
+    final private Grid<JobWrapper> jobsGrid;
 
-    ProcessListView(SAPProcess sapProcess, ThreadPoolTaskExecutor taskExecutor) {
+    ProcessListView(SAPProcess sapProcess, JobManager jobManager,
+                    @Qualifier("applicationTaskExecutor") TaskExecutor taskExecutor) {
+        this.jobManager = jobManager;
 
         add(new ViewToolbar("Process List"));
 
-        FormLayout formLayout = new FormLayout();
+        jobsGrid = new Grid<>();
+        jobsGrid.setItems(jobManager.getJobs());
+        // Create the columns
+        jobsGrid.addColumn(JobWrapper::getId).setHeader("Id").setResizable(true)
+                .setAutoWidth(true).setFlexGrow(0);
+        jobsGrid.addColumn(JobWrapper::getDescription).setHeader("Description").setResizable(true)
+                .setAutoWidth(true).setFlexGrow(0);
+        jobsGrid.addColumn(JobWrapper::getStatusMessage).setHeader("Status").setResizable(true)
+                .setAutoWidth(true).setFlexGrow(0);
+        jobsGrid.addColumn(new YesBlankRenderer<>(JobWrapper::isInError)).setHeader("In Error").setResizable(true)
+                .setAutoWidth(true).setFlexGrow(0);
+        jobsGrid.addColumn(JobWrapper::getErrorMessage).setHeader("Error Message").setResizable(true)
+                .setAutoWidth(true).setFlexGrow(0);
+        jobsGrid.addColumn(new YesBlankRenderer<>(JobWrapper::isCompleted)).setHeader("Is Complete").setResizable(true)
+                .setAutoWidth(true).setFlexGrow(0);
+        jobsGrid.addColumn(JobWrapper::getCompletedMessage).setHeader("Complete Message").setResizable(true)
+                .setAutoWidth(true).setFlexGrow(0);
+        jobsGrid.addColumn(new YesBlankRenderer<>(JobWrapper::isCancelled)).setHeader("Is Cancelled").setResizable(true)
+                .setAutoWidth(true).setFlexGrow(0);
+        jobsGrid.setPartNameGenerator(jobWrapper -> {
+            if (jobWrapper.isCompleted())
+                return "high-rating";
+            if (jobWrapper.isInError())
+                return "low-rating";
+            if (jobWrapper.isCancelled())
+                return "medium-rating";
+            return null;
+        });
+        HorizontalLayout actionsHeaderLayout = new HorizontalLayout();
+        actionsHeaderLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        actionsHeaderLayout.add(new Text("Actions") );
+        Button newButton = new Button(new Icon(VaadinIcon.PLUS));
+        newButton.setTooltipText("Start Job");
+        newButton.addClickListener(event -> {
+            // Start a background job via the manager
+            jobManager.startBackgroundJob(UI.getCurrent(),jobsGrid);
+            jobsGrid.setItems(jobManager.getJobs());
+        });
+        actionsHeaderLayout.add(newButton);
+        jobsGrid.addComponentColumn(jobWrapper -> {
+            HorizontalLayout actionsLayout = new HorizontalLayout();
+            Button editButton = new Button(new Icon(VaadinIcon.STOP_COG));
+            editButton.setTooltipText("Cancel this Job");
+            editButton.addClickListener(e -> {
+                jobWrapper.cancel();
+                jobsGrid.getListDataView().refreshItem(jobWrapper);
+            });
+            actionsLayout.add(editButton);
+            return actionsLayout;
+        }).setHeader(actionsHeaderLayout).setWidth("150px").setFlexGrow(0);
 
-        // Add a button to start an async process
-
-        Consumer<String> completeConsumer =
-                s -> ui.access(() -> notifyUser(s));
-        Consumer<Double> statusConsumer = d -> ui.access(() -> notifyUser("Procesed "+d));
-        Consumer<Exception> errorConsumer = e -> ui.access(()->notifyUserError(e));
-
-        Button starterButton = new Button("Start a process");
-        starterButton.addClickListener(
-                event -> sapProcess.executeProcess(completeConsumer,statusConsumer,errorConsumer));
-
-        Button starterButton2 = new Button("Start a background job");
-        starterButton2.addClickListener(event -> sapProcess.startBackgroundJob()
-                .doOnError(this::onJobFailed)
-                .doOnComplete(this::notifyUserComplete)
-                .subscribeOn(Schedulers.fromExecutor(taskExecutor))
-                .subscribe(this::onJobUpdate));
-
-        formLayout.add(starterButton, starterButton2);
-        formLayout.add(message);
-        formLayout.setSizeFull();
-        add(formLayout);
-        message.setText( "Click a button");
-    }
-
-    private void onJobFailed(Throwable error) {
-        ui.access(() -> message.setText(error.getMessage()));
-    }
-
-    private void onJobUpdate(String s) {
-        ui.access(() -> message.setText(s));
-    }
-
-    private void notifyUser(String s) {
-        // Need to show the error somehow
-        //log.info( "ProcessListView received " + s);
-        message.setText("Job: " + s);
-    }
-
-    private void notifyUserError(Exception e) {
-        // Need to show the error somehow
-        //log.info( "ProcessListView received " + s);
-        message.setText("Job Error: " + e.getMessage());
-    }
-
-    private void notifyUserComplete() {
-        // Need to show the error somehow
-        ui.access(() -> message.setText( "Background job completed "));
-    }
-
-    private void notifyUserViaLog(String s) {
-        // Need to show the error somehow
-        log.info( "ProcessListView received " + s);
-        //Notification.show("Job: " + s);
+        add(jobsGrid);
+        setSizeFull();
+        addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
+                LumoUtility.Padding.MEDIUM, LumoUtility.Gap.SMALL);
     }
 }

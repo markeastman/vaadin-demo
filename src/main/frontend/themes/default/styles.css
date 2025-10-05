@@ -1,1 +1,13 @@
 /* Add your styles here */
+
+vaadin-grid::part(high-rating) {
+    background: linear-gradient(var(--lumo-success-color-10pct), var(--lumo-success-color-10pct)) var(--lumo-base-color);
+}
+
+vaadin-grid::part(medium-rating) {
+    background: linear-gradient(var(--lumo-error-color-10pct), var(--lumo-error-color-10pct)) var(--lumo-base-color);
+}
+
+vaadin-grid::part(low-rating) {
+    background: linear-gradient(var(--lumo-error-color-50pct), var(--lumo-error-color-50pct)) var(--lumo-base-color);
+}

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @Service
 public class SAPProcess {
@@ -18,20 +19,29 @@ public class SAPProcess {
     @Async
     public void executeProcess(Consumer<String> onComplete,
                                Consumer<Double> onProgress,
-                               Consumer<Exception> onError) {
+                               Consumer<Exception> onError,
+                               Supplier<Boolean> isCancelled) {
         // This will start a SAP process which will run in the background
+        // At the moment it just simulates a background task
         try {
             for (int i=0; i<10; i++) {
                 Thread.sleep(1000); // Wait second
+                if (isCancelled.get()) // Been cancelled so stop
+                    break;
+                // Randomly check if we should pretend we had an error
+                if (Math.random() > 0.95)
+                    throw new RuntimeException("Error due to random value" );
                 log.info("Executing SAP Process step " + i);
                 onProgress.accept((double)i / 10.0);
             }
-            onComplete.accept("Completed SAP Process");
+            if (!isCancelled.get())
+                onComplete.accept("Completed SAP Process");
         } catch (Exception ex) {
             onError.accept(ex);
         }
     }
 
+    /*
     public Flux<String> startBackgroundJob() {
         return Flux.create(
                 sink -> {
@@ -47,4 +57,5 @@ public class SAPProcess {
                     }
                 });
     }
+     */
 }

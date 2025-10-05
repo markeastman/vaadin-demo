@@ -57,13 +57,22 @@ This has a header and multiple lines. Each line can be a different
 type of expense so we will need to have different panels for
 each expense type.
 
+## Background Jobs
+
 The ProcessListView experiments with some background job
 execution and updating the ui based on status updates from the 
 background task. We have tested the @Async style and also the reactive streams 
 style using Flux interaction. We have created a Thread pool for
-async processing within the Application class.
+async processing within the Application class. To manage
+the asynchronous processes we wrap each one in a JobWrapper
+and manage all of them via a JobManager. At the moment the view
+that starts the background job will see updates, but if another
+user looks at the list of running jobs they do not get to see the
+updates dynamically. To do this we would have to push the same
+events to all the users that are on this process view which at the 
+moment I am not sure what is the best idiom for this.
 
-# Things to do or investigate
+## Things to do or investigate
 
 1. Need to think about when to use dialogs for editing and 
 when to use views. I think the view processing is better as it seems to have better 
