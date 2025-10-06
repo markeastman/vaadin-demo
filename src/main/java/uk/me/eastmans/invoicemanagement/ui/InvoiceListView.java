@@ -36,7 +36,7 @@ import java.util.function.Consumer;
 
 @Route("invoice-list")
 @RolesAllowed("INVOICES")
-@PageTitle("Invoices List")
+@PageTitle("Invoice List")
 @Menu(order = 3, icon = "vaadin:invoice", title = "Invoices List")
 class InvoiceListView extends Main {
 
@@ -53,7 +53,8 @@ class InvoiceListView extends Main {
 
         invoicesGrid = new Grid<>();
         Grid.Column<Invoice> descriptionColumn = invoicesGrid.addColumn(Invoice::getDescription);
-        Grid.Column<Invoice> invoiceDateColumn = invoicesGrid.addColumn(Invoice::getInvoiceDate);
+        invoicesGrid.addColumn(Invoice::getInvoiceDate);
+        invoicesGrid.addColumn(Invoice::getMimeType);
         Grid.Column<Invoice> actionsColumn = invoicesGrid.addColumn(new ComponentRenderer<>(header -> new Span()));
         List<Invoice> invoices = invoiceService.listAll();
         dataView = invoicesGrid.setItems(invoices);

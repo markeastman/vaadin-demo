@@ -24,7 +24,7 @@ import java.util.HashSet;
 
 @Route("persona-list")
 @RolesAllowed("PERSONAS")
-@PageTitle("Personas List")
+@PageTitle("Persona List")
 @Menu(order = 1, icon = "vaadin:user-check", title = "Persona List")
 class PersonaListView extends Main {
 

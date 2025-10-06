@@ -39,7 +39,7 @@ import java.util.function.Consumer;
 
 @Route("expense-list")
 @RolesAllowed("EXPENSES")
-@PageTitle("Expenses List")
+@PageTitle("Expense List")
 @Menu(order = 1, icon = "vaadin:money-exchange", title = "Expenses List")
 class ExpensesListView extends Main {
 

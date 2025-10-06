@@ -20,6 +20,16 @@ public class Invoice {
     @Temporal(TemporalType.DATE)
     private LocalDate invoiceDate;
 
+    @Column(name = "fileName", nullable = false, length = DESCRIPTION_MAX_LENGTH)
+    private String fileName = "";
+
+    @Column(name = "mimeType", nullable = false, length = DESCRIPTION_MAX_LENGTH)
+    private String mimeType = "";
+
+
+    @Lob
+    private byte[] imageData;
+
     protected Invoice() { // To keep Hibernate happy
     }
 
@@ -38,9 +48,33 @@ public class Invoice {
 
     public void setDescription(String description) {this.description = description;}
 
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String filename) {
+        this.fileName = filename;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
     public LocalDate getInvoiceDate() {return invoiceDate;}
 
     public void setInvoiceDate(LocalDate when) {this.invoiceDate = when;}
+
+    public byte[] getImageData() {
+        return imageData;
+    }
+
+    public void setImageData(byte[] imageData) {
+        this.imageData = imageData;
+    }
 
     @Override
     public boolean equals(Object obj) {

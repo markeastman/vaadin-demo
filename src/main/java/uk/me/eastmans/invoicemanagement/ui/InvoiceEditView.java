@@ -5,23 +5,29 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.page.History;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.InMemoryUploadHandler;
+import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import uk.me.eastmans.base.ui.component.ViewToolbar;
 import uk.me.eastmans.invoicemanagement.Invoice;
 import uk.me.eastmans.invoicemanagement.InvoiceService;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Optional;
@@ -36,7 +42,11 @@ public class InvoiceEditView  extends Main implements HasUrlParameter<String> {
     final TextField description;
     final DatePicker invoiceDate;
     final Button saveButton;
+    final FormLayout formLayout;
     final Binder<Invoice> editBinder = new Binder<>(Invoice.class);
+    private byte[] byteData;
+    private String filename;
+    private String mimeType;
 
     public static void editInvoice(Long invoiceId) {
         UI.getCurrent().navigate(InvoiceEditView.class, String.valueOf(invoiceId));
@@ -62,7 +72,7 @@ public class InvoiceEditView  extends Main implements HasUrlParameter<String> {
                 //        "Description length must be less than " + (ExpenseLine.DESCRIPTION_MAX_LENGTH+1) + ".")
                 .bind( Invoice::getInvoiceDate, Invoice::setInvoiceDate );
 
-        FormLayout formLayout = new FormLayout();
+        formLayout = new FormLayout();
         formLayout.setExpandColumns(true);
         formLayout.setExpandFields(true);
         addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
@@ -112,7 +122,35 @@ public class InvoiceEditView  extends Main implements HasUrlParameter<String> {
             viewToolbar.setTitle("Create Invoice");
             saveButton.setText("Save");
             saveButton.setEnabled(false);
+
+            InMemoryUploadHandler inMemoryHandler = UploadHandler.inMemory(
+                    (metadata, data) -> {
+                        // Get other information about the file.
+                        filename = metadata.fileName();
+                        mimeType = metadata.contentType();
+                        //long contentLength = metadata.contentLength();
+                        // Do something with the file data...
+                        byteData = data;
+                        // processFile(data, fileName);
+                    });
+            Upload upload = new Upload(inMemoryHandler);
+            upload.setMaxFiles(1);
+
+            FormLayout.FormRow row = new FormLayout.FormRow();
+            row.add(upload,3);
+            formLayout.add(row);
+        } else {
+            // Show a preview
+            StreamResource resource = new StreamResource(
+                    invoice.getFileName(), () -> new ByteArrayInputStream(invoice.getImageData()));
+            Image image = new Image(resource, invoice.getFileName());
+            image.addClassNames(LumoUtility.Border.ALL, LumoUtility.BorderColor.CONTRAST);
+
+            FormLayout.FormRow row = new FormLayout.FormRow();
+            row.add(image,3);
+            formLayout.add(row);
         }
+
         this.invoice = invoice;
         editBinder.readBean(invoice);
 
@@ -122,6 +160,10 @@ public class InvoiceEditView  extends Main implements HasUrlParameter<String> {
     private void saveOrCreate() {
         try {
             editBinder.writeBean(invoice);
+            // Set the byte array
+            invoice.setFileName(filename);
+            invoice.setMimeType(mimeType);
+            invoice.setImageData(byteData);
             if (editBinder.validate().isOk()) {
                 invoiceService.saveOrCreate(invoice);
                 Notification.show("Invoice saved", 3000, Notification.Position.BOTTOM_END)
