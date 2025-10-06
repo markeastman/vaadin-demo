@@ -43,6 +43,7 @@ public class ExpenseHeader {
         this.owner = owner;
         this.name = name;
         this.description = description;
+        this.totalAmount = BigDecimal.ZERO;
         this.expenseLines = new ArrayList<>();
     }
 

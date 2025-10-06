@@ -52,6 +52,8 @@ public class DataLoader implements ApplicationRunner {
         authorityRepository.save(personas);
         Authority expenses = new Authority("ROLE_EXPENSES", "Manage expenses");
         authorityRepository.save(expenses);
+        Authority invoices = new Authority("ROLE_INVOICES", "Manage invoices");
+        authorityRepository.save(invoices);
 
         // Create the personas
         HashSet<Authority> adminAuthorities = new HashSet<>();
@@ -59,12 +61,14 @@ public class DataLoader implements ApplicationRunner {
         adminAuthorities.add(users);
         adminAuthorities.add(personas);
         adminAuthorities.add(expenses);
+        adminAuthorities.add(invoices);
         Persona adminPersona = new Persona("Administrator", adminAuthorities);
         personaRepository.save(adminPersona);
         HashSet<Authority> ccAuthorities = new HashSet<>();
         ccAuthorities.add(suppliers);
         ccAuthorities.add(tasks);
         ccAuthorities.add(expenses);
+        ccAuthorities.add(invoices);
         Persona ccPersona = new Persona("Credit Controller", ccAuthorities);
         personaRepository.save(ccPersona);
         HashSet<Authority> smAuthorities = new HashSet<>();

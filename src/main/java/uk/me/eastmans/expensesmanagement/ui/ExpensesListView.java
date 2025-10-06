@@ -40,7 +40,7 @@ import java.util.function.Consumer;
 @Route("expense-list")
 @RolesAllowed("EXPENSES")
 @PageTitle("Expenses List")
-@Menu(order = 1, icon = "vaadin:user-check", title = "Expenses List")
+@Menu(order = 1, icon = "vaadin:money-exchange", title = "Expenses List")
 class ExpensesListView extends Main {
 
     final AuthenticationContext authenticationContext;
@@ -82,7 +82,7 @@ class ExpensesListView extends Main {
             Button newButton = new Button(new Icon(VaadinIcon.PLUS));
             newButton.setTooltipText("Create a new Expense");
             newButton.addClickListener(event -> {
-                // Create a new User
+                // Create a new expense
                 createExpense();
             });
             actionsHeaderLayout.add(newButton);

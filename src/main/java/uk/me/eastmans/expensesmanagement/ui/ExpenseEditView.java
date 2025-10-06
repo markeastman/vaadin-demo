@@ -114,6 +114,14 @@ public class ExpenseEditView extends Main implements HasUrlParameter<String> {
         HorizontalLayout buttonLayout = new HorizontalLayout(saveButton, cancel);
         add(buttonLayout);
 
+        // Enable or disable save button based on validation errors
+        editBinder.addStatusChangeListener(event -> {
+            boolean isValid = event.getBinder().isValid();
+            boolean hasChanges = event.getBinder().hasChanges();
+
+            saveButton.setEnabled(hasChanges && isValid);
+        });
+
         // Add the lines
         linesGrid = new Grid<>(ExpenseLine.class, false);
         linesGrid.setSizeFull();
