@@ -1,5 +1,6 @@
 package uk.me.eastmans.base.ui;
 
+import com.vaadin.flow.component.html.H2;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -28,21 +29,23 @@ public final class MainView extends Main {
         setSizeFull();
 
         var contentDiv = new Div();
-        contentDiv.addClassNames(LumoUtility.Flex.GROW, LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
-                LumoUtility.AlignItems.CENTER, LumoUtility.JustifyContent.CENTER);
+        contentDiv.addClassNames(LumoUtility.Flex.GROW, LumoUtility.Display.FLEX,
+                LumoUtility.FlexDirection.COLUMN,
+                LumoUtility.AlignItems.CENTER);
+                //LumoUtility.JustifyContent.CENTER);
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
         Authentication auth = securityContext.getAuthentication();
 
-        var centerDiv = new Div( new Paragraph("You have the following authorities"));
+        var centerDiv = new Div( new H2("You have the following authorities"));
         centerDiv.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
                 LumoUtility.AlignItems.CENTER);
 
-        auth.getAuthorities().forEach(
-                authority -> centerDiv.add(new Paragraph(authority.toString())));
+        auth.getAuthorities().forEach(authority ->
+                centerDiv.add(new Paragraph(authority.toString())));
         contentDiv.add(centerDiv);
 
-        add(new ViewToolbar("Welcome to Vaadin! " + auth.getName()));
+        add(new ViewToolbar("Welcome to Vaadin! " ));
         add(contentDiv);
     }
 }

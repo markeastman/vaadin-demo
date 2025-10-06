@@ -91,7 +91,7 @@ class InvoiceListView extends Main {
         addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
                 LumoUtility.Padding.MEDIUM, LumoUtility.Gap.SMALL);
 
-        add(new ViewToolbar("Invoices List", ViewToolbar.group()));
+        add(new ViewToolbar("Invoice List", ViewToolbar.group()));
         add(invoicesGrid);
     }
 

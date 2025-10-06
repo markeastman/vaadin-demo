@@ -102,7 +102,7 @@ class ExpensesListView extends Main {
             addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
                     LumoUtility.Padding.MEDIUM, LumoUtility.Gap.SMALL);
 
-            add(new ViewToolbar("Expenses List", ViewToolbar.group()));
+            add(new ViewToolbar("Expense List", ViewToolbar.group()));
             add(expensesGrid);
         }
     }
